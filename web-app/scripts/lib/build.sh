@@ -9,6 +9,9 @@ cmd_install_deps() {
   fi
   log_info "Installing and updating dependencies..."
   npm install && npm update
+  if [ -d "$SCRIPT_DIR/../../design-tokens" ]; then
+    (cd "$SCRIPT_DIR/../../design-tokens" && node build.js) || true
+  fi
   log_success "Dependencies installed and updated successfully."
 }
 

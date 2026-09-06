@@ -1,4 +1,4 @@
-import { HTTP_CONSTANTS } from "@observability/shared-infra";
+import { HTTP_CONSTANTS } from "@observability/shared-infra/http";
 import { webAppRegistryManager } from "@/lib/service-registry/web-app-registration";
 
 export async function register() {

@@ -7,7 +7,7 @@ import {
   withAuthGuard,
   isPublicRoute,
   type HttpMiddlewareCtx,
-} from '@observability/shared-infra';
+} from '@observability/shared-infra/http';
 
 function extractSessionToken(req: NextRequest): string | undefined {
   const val =

@@ -5,6 +5,7 @@ WORKDIR /app
 RUN apk add --no-cache bash
 
 COPY design-tokens /app/packages/node/design-tokens
+RUN node /app/packages/node/design-tokens/build.js
 COPY shared-infra /app/packages/node/shared-infra
 COPY web-app /app/packages/node/web-app
 
