@@ -35,7 +35,7 @@ PACKAGES_DIR="$(cd "$NODE_DIR/.." && pwd)"
 REPO_ROOT="$(cd "$PACKAGES_DIR/.." && pwd)"
 
 AUTH_DIR="$NODE_DIR/auth"
-PYTHON_ROOT="$PACKAGES_DIR/python"
+PYTHON_ROOT="$PACKAGES_DIR/llm-obs-python-packages"
 
 LATENCY_DIR="${PYTHON_ROOT}/latency-engine"
 ALERT_DIR="${PYTHON_ROOT}/alert-engine"
