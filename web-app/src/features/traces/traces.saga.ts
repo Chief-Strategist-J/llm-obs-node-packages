@@ -1,7 +1,7 @@
 import { call, put, takeEvery } from "redux-saga/effects";
 import { tracesActions } from "./traces.slice";
 import { tracesClientService } from "./service/traces-client.service";
-import { eventBus } from "@observability/shared-infra";
+import { eventBus } from "@observability/shared-infra/event-bus";
 import { TRACES_CONFIG_DEFAULTS, TRACES_EVENTS } from "./constants";
 import type { TraceSummary, TraceDetailResult } from "./types";
 

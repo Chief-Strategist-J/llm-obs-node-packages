@@ -1,4 +1,4 @@
-import { featureRegistry } from "@observability/shared-infra";
+import { featureRegistry } from "@observability/shared-infra/store";
 import { overviewReducer } from "./overview.slice";
 import { overviewSaga } from "./overview.saga";
 

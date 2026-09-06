@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { CostSummaryQuerySchema, costsClientService } from "@/features/costs";
-import { withTracedValidation } from "@observability/shared-infra";
+import { withTracedValidation } from "@observability/shared-infra/http";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);

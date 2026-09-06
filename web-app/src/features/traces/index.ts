@@ -1,4 +1,4 @@
-import { featureRegistry } from "@observability/shared-infra";
+import { featureRegistry } from "@observability/shared-infra/store";
 import { tracesReducer } from "./traces.slice";
 import { tracesSaga } from "./traces.saga";
 

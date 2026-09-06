@@ -1,7 +1,7 @@
 import { call, put, takeEvery } from "redux-saga/effects";
 import { overviewActions } from "./overview.slice";
 import { overviewClientService } from "./service/overview-client.service";
-import { eventBus } from "@observability/shared-infra";
+import { eventBus } from "@observability/shared-infra/event-bus";
 import { OVERVIEW_CONFIG_DEFAULTS, OVERVIEW_EVENTS } from "./constants";
 import type { OverviewKPIAggregates, SystemHealthSLOBanner, RecentTracePreview } from "./types";
 

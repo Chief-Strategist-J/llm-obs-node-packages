@@ -1,4 +1,4 @@
-import { trace, ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@observability/shared-infra';
+import { trace, ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@observability/shared-infra/tracing';
 
 let providerInitialized = false;
 

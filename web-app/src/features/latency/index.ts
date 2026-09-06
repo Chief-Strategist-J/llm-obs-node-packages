@@ -1,4 +1,4 @@
-import { featureRegistry } from "@observability/shared-infra";
+import { featureRegistry } from "@observability/shared-infra/store";
 import { latencyReducer } from "./latency.slice";
 import { latencySaga } from "./latency.saga";
 

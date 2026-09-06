@@ -1,7 +1,7 @@
 import { call, put, takeEvery } from "redux-saga/effects";
 import { costsActions } from "./costs.slice";
 import { costsClientService } from "./service/costs-client.service";
-import { eventBus } from "@observability/shared-infra";
+import { eventBus } from "@observability/shared-infra/event-bus";
 import { COSTS_CONFIG_DEFAULTS, COSTS_EVENTS } from "./constants";
 import type { CostSummaryResult, CostByProvider } from "./types";
 

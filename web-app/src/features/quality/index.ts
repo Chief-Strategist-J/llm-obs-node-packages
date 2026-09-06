@@ -1,4 +1,4 @@
-import { featureRegistry } from "@observability/shared-infra";
+import { featureRegistry } from "@observability/shared-infra/store";
 import { qualityReducer } from "./quality.slice";
 import { qualitySaga } from "./quality.saga";
 

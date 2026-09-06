@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { HTTP_CONSTANTS } from "@observability/shared-infra";
+import { HTTP_CONSTANTS } from "@observability/shared-infra/http";
 
 export async function GET() {
   return NextResponse.json({

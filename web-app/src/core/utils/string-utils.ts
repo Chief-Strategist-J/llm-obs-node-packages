@@ -1,4 +1,4 @@
-import { errorRegistry, RULES_ENGINE_CONSTANTS } from "@observability/shared-infra";
+import { errorRegistry, RULES_ENGINE_CONSTANTS } from "@observability/shared-infra/rules-engine";
 
 export function normalizeString(input?: string | null): string {
   if (!input || typeof input !== "string") return "";

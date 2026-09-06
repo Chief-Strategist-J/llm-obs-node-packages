@@ -1,4 +1,4 @@
-import { featureRegistry } from "@observability/shared-infra";
+import { featureRegistry } from "@observability/shared-infra/store";
 import { costsReducer } from "./costs.slice";
 import { costsSaga } from "./costs.saga";
 

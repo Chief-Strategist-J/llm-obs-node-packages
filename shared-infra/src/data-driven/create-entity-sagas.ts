@@ -1,4 +1,3 @@
-import { call, put, takeEvery } from 'redux-saga/effects';
 import { eventBus } from '../event-bus/event-bus';
 import type { CrudPort } from './create-entity-adapter';
 
@@ -7,6 +6,7 @@ export function createEntitySagas<T extends { id: string }>(
   adapter: CrudPort<T>,
   slice: any,
 ) {
+  const { call, put, takeEvery } = require('redux-saga/effects');
   function* fetchAll(): Generator {
     yield put(slice.actions.setStatus('loading'));
     try {

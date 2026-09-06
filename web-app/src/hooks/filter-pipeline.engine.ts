@@ -1,4 +1,4 @@
-import { trace } from '@observability/shared-infra';
+import { trace } from '@observability/shared-infra/tracing';
 import type { ListOp } from '../core/data-driven/transform.types';
 import {
   FILTER_PIPELINE_RULES,
