@@ -1,6 +1,8 @@
 [submodule "web-app"]
 	path = web-app
 	url = https://github.com/Chief-Strategist-J/web-app.git
+	branch = main
 [submodule "auth"]
 	path = auth
 	url = https://github.com/Chief-Strategist-J/auth.git
+	branch = main
