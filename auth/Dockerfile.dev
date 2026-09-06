@@ -10,7 +10,8 @@ COPY auth /app/packages/node/auth
 
 WORKDIR /app/packages/node/auth
 
-RUN npm install --prefer-offline --no-audit --no-fund || true
+RUN cd /app/packages/node/shared-infra && npm install --no-audit --no-fund
+RUN cd /app/packages/node/auth && npm install --no-audit --no-fund
 
 ENV NODE_ENV=development
 ENV PORT=3001

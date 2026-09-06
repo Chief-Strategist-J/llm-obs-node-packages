@@ -2,7 +2,7 @@ import {
   createServiceClient,
   executeServiceClientQuery,
 } from "@observability/shared-infra/discovery";
-import { mapJson } from "@observability/shared-infra/data-driven";
+import { mapJson } from "@observability/shared-infra/json-map";
 import { HTTP_CONSTANTS } from "@observability/shared-infra/http";
 import type { TraceSummary, TraceDetailResult } from "../types";
 import { TraceSummaryFromApiOps } from "../schema";

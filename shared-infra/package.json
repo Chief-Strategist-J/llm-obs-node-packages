@@ -15,7 +15,8 @@
     "./feature-flags": "./src/feature-flags/resolve-flag.ts",
     "./kafka": "./src/kafka/kafka-client.ts",
     "./tracing": "./src/tracing/index.ts",
-    "./discovery": "./src/discovery/index.ts"
+    "./discovery": "./src/discovery/index.ts",
+    "./json-map": "./src/data-driven/json-map.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"

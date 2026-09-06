@@ -38,6 +38,7 @@
       "@observability/shared-infra/discovery": ["../shared-infra/src/discovery/index.ts"],
       "@observability/shared-infra/feature-flags": ["../shared-infra/src/feature-flags/resolve-flag.ts"],
       "@observability/shared-infra/rules-engine": ["../shared-infra/src/rules-engine/index.ts"],
+      "@observability/shared-infra/json-map": ["../shared-infra/src/data-driven/json-map.ts"],
       "@observability/shared-infra/*": ["../shared-infra/src/*"],
       "@observability/auth": ["../auth/src/index.ts"],
       "@observability/auth/*": ["../auth/src/*"]
