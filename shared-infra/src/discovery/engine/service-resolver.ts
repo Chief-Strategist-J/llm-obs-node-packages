@@ -60,6 +60,15 @@ export class ServiceResolver {
       return cached.url;
     }
 
+    if (typeof window !== "undefined") {
+      const entry = this.findCatalogEntry(serviceKey);
+      const url = fallbackUrl || entry?.defaultUrl || "";
+      if (url) {
+        this.cache.set(serviceKey, { url, expiresAt: Date.now() + this.ttlMs });
+      }
+      return url;
+    }
+
     return tracer.startActiveSpan(
       `ServiceResolver.resolve:${serviceKey}`,
       {

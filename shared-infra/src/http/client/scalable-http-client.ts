@@ -120,7 +120,7 @@ export class ScalableHttpClient {
 
           span.setAttribute("execution.step_count", ctx.stepIndex);
 
-          const result = { data: ctx.cachedResponse as T, status: 200, headers: {} };
+          const result = { data: ctx.cachedResponse as T, status: ctx.statusCode ?? 200, headers: {} };
 
           if (rawConfig.method.toUpperCase() === HTTP_CONSTANTS.METHOD_GET && ctx.hashedRequestKey) {
             this.inFlightSingleflights.set(ctx.hashedRequestKey, Promise.resolve(result));

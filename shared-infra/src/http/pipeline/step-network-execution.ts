@@ -39,10 +39,6 @@ export class StepNetworkExecution implements PipelineStep {
           signal: controller.signal as any,
         }).finally(() => clearTimeout(timer));
 
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-        }
-
         let data: T;
         const getHeader = typeof res.headers?.get === "function" ? (k: string) => res.headers.get(k) : () => null;
         const contentType = getHeader(HTTP_CONSTANTS.HEADER_CONTENT_TYPE) || "";
@@ -55,6 +51,29 @@ export class StepNetworkExecution implements PipelineStep {
           data = (await res.json()) as T;
         } else {
           data = {} as T;
+        }
+
+        ctx.statusCode = res.status;
+
+        if (!res.ok) {
+          const httpError = new Error(`HTTP ${res.status}: ${res.statusText}`);
+          (httpError as any).status = res.status;
+          (httpError as any).statusCode = res.status;
+          (httpError as any).data = data;
+          (httpError as any).code = (data as any)?.error?.code || (res.status === 401 ? "UNAUTHORIZED" : `HTTP_${res.status}`);
+
+          // Client errors (4xx) mean server responded normally (e.g. invalid credentials)
+          // Do NOT trip circuit breaker and do NOT retry
+          if (res.status >= 400 && res.status < 500) {
+            if (ctx.circuitKey) {
+              ctx.circuitBreaker.onSuccess(ctx.circuitKey);
+            }
+            ctx.cachedResponse = data;
+            ctx.span?.setStatus({ code: 1 });
+            return;
+          }
+
+          throw httpError;
         }
 
         if (ctx.circuitKey) {

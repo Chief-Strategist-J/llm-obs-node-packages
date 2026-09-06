@@ -35,6 +35,7 @@ export interface PipelineContext<T = unknown> {
   circuitKey?: string;
   singleflightHit?: boolean;
   cachedResponse?: T;
+  statusCode?: number;
   
   // Shared Resilience References
   admissionControl: ConcurrencyAdmissionControl;

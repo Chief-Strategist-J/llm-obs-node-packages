@@ -20,13 +20,15 @@ import { HTTP_CONSTANTS } from "../constants";
 
 function calculatePayloadSizeBytes(body: unknown): number {
   if (body === undefined || body === null) return 0;
-  if (typeof body === "string") return Buffer.byteLength(body, "utf-8");
-  if (Buffer.isBuffer(body)) return body.length;
+  if (typeof body === "string") {
+    return typeof Buffer !== "undefined" ? Buffer.byteLength(body, "utf-8") : new TextEncoder().encode(body).length;
+  }
+  if (typeof Buffer !== "undefined" && Buffer.isBuffer(body)) return body.length;
   if (body instanceof Uint8Array) return body.byteLength;
 
   try {
     const jsonString = JSON.stringify(body);
-    return Buffer.byteLength(jsonString, "utf-8");
+    return typeof Buffer !== "undefined" ? Buffer.byteLength(jsonString, "utf-8") : new TextEncoder().encode(jsonString).length;
   } catch (err: any) {
     throw new Error(`Invalid request payload: unable to serialize body to JSON (${err?.message || "circular structure"})`);
   }
