@@ -1,12 +1,15 @@
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
-const tokensPath = path.resolve('tokens.json');
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const tokensPath = path.resolve(__dirname, 'tokens.json');
+const distDir = path.resolve(__dirname, 'dist');
 const tokens = JSON.parse(fs.readFileSync(tokensPath, 'utf8'));
 
 // Ensure dist directory exists
-if (!fs.existsSync('dist')) {
-  fs.mkdirSync('dist', { recursive: true });
+if (!fs.existsSync(distDir)) {
+  fs.mkdirSync(distDir, { recursive: true });
 }
 
 // Generate CSS Custom Properties
@@ -44,12 +47,12 @@ for (const [key, val] of Object.entries(tokens.colors['high-contrast'])) {
 }
 css += `}\n`;
 
-fs.writeFileSync(path.resolve('dist/variables.css'), css, 'utf8');
+fs.writeFileSync(path.resolve(distDir, 'variables.css'), css, 'utf8');
 
 // Generate JavaScript exports
 const jsContent = `export const tokens = ${JSON.stringify(tokens, null, 2)};
 `;
-fs.writeFileSync(path.resolve('dist/index.js'), jsContent, 'utf8');
+fs.writeFileSync(path.resolve(distDir, 'index.js'), jsContent, 'utf8');
 
 // Generate TypeScript definitions
 const dtsContent = `export declare const tokens: {
@@ -75,6 +78,6 @@ const dtsContent = `export declare const tokens: {
   };
 };
 `;
-fs.writeFileSync(path.resolve('dist/index.d.ts'), dtsContent, 'utf8');
+fs.writeFileSync(path.resolve(distDir, 'index.d.ts'), dtsContent, 'utf8');
 
 console.log('Design tokens compiled successfully!');
