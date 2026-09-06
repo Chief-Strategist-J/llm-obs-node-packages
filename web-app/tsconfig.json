@@ -34,6 +34,10 @@
     "paths": {
       "@/*": ["./src/*"],
       "@observability/shared-infra": ["../shared-infra/src/index.ts"],
+      "@observability/shared-infra/http": ["../shared-infra/src/http/index.ts"],
+      "@observability/shared-infra/discovery": ["../shared-infra/src/discovery/index.ts"],
+      "@observability/shared-infra/feature-flags": ["../shared-infra/src/feature-flags/resolve-flag.ts"],
+      "@observability/shared-infra/rules-engine": ["../shared-infra/src/rules-engine/index.ts"],
       "@observability/shared-infra/*": ["../shared-infra/src/*"],
       "@observability/auth": ["../auth/src/index.ts"],
       "@observability/auth/*": ["../auth/src/*"]

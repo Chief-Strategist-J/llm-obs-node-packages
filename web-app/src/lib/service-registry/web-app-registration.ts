@@ -1,3 +1,3 @@
-import { platformRegistryManager } from "@observability/shared-infra";
+import { platformRegistryManager } from "@observability/shared-infra/discovery";
 
 export const webAppRegistryManager = platformRegistryManager;

@@ -14,7 +14,8 @@
     "./rules-engine": "./src/rules-engine/index.ts",
     "./feature-flags": "./src/feature-flags/resolve-flag.ts",
     "./kafka": "./src/kafka/kafka-client.ts",
-    "./tracing": "./src/tracing/index.ts"
+    "./tracing": "./src/tracing/index.ts",
+    "./discovery": "./src/discovery/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"

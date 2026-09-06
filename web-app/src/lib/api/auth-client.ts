@@ -18,7 +18,8 @@
  * ============================================================================
  */
 
-import { serviceResolver, HTTP_CONSTANTS } from "@observability/shared-infra";
+import { serviceResolver } from "@observability/shared-infra/discovery";
+import { HTTP_CONSTANTS } from "@observability/shared-infra/http";
 import { withRetry, withCache, withCircuitBreaker } from "../../core/data-driven/adapter-decorators";
 import { executeHttpRequest, type ExecuteParams } from "./executor";
 import type {

@@ -24,7 +24,7 @@
 
 import { propagation, context } from "@opentelemetry/api";
 import { AUTH_ENDPOINTS, type ApiEndpointKey } from "./auth-endpoints";
-import { httpClient } from "@observability/shared-infra";
+import { httpClient } from "@observability/shared-infra/http";
 
 export interface ExecuteParams {
   pathParams?: Record<string, string>;

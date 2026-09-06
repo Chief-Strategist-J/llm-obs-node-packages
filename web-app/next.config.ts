@@ -3,12 +3,11 @@ import path from 'path';
 
 const nextConfig: NextConfig = {
   outputFileTracingRoot: path.join(__dirname, '../../..'),
+  serverExternalPackages: ['redux-saga'],
   experimental: {},
   transpilePackages: [
     '@observability/shared-infra',
     '@observability/design-tokens',
-    '@observability/api-types',
-    '@observability/realtime-sdk',
   ],
   eslint: {
     ignoreDuringBuilds: true,
