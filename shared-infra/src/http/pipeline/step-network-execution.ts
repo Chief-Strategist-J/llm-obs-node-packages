@@ -62,8 +62,6 @@ export class StepNetworkExecution implements PipelineStep {
           (httpError as any).data = data;
           (httpError as any).code = (data as any)?.error?.code || (res.status === 401 ? "UNAUTHORIZED" : `HTTP_${res.status}`);
 
-          // Client errors (4xx) mean server responded normally (e.g. invalid credentials)
-          // Do NOT trip circuit breaker and do NOT retry
           if (res.status >= 400 && res.status < 500) {
             if (ctx.circuitKey) {
               ctx.circuitBreaker.onSuccess(ctx.circuitKey);
@@ -85,7 +83,7 @@ export class StepNetworkExecution implements PipelineStep {
         }
 
         ctx.cachedResponse = data;
-        ctx.span?.setStatus({ code: 1 }); // OK
+        ctx.span?.setStatus({ code: 1 });
         return;
       } catch (err: any) {
         lastError = err;
