@@ -11,7 +11,6 @@
 import { HTTP_CONSTANTS } from "../constants";
 
 export const PUBLIC_ROUTES: string[] = [
-  HTTP_CONSTANTS.ENDPOINT_ROOT,
   HTTP_CONSTANTS.ENDPOINT_AUTH_SIGN_IN,
   HTTP_CONSTANTS.ENDPOINT_AUTH_SIGN_UP,
   HTTP_CONSTANTS.ENDPOINT_AUTH_CALLBACK,
@@ -29,5 +28,7 @@ export function isPublicRoute(
   ) {
     return true;
   }
-  return publicRoutes.some((route) => pathname.startsWith(route));
+  return publicRoutes.some((route) =>
+    route === HTTP_CONSTANTS.ENDPOINT_ROOT ? pathname === HTTP_CONSTANTS.ENDPOINT_ROOT : pathname.startsWith(route)
+  );
 }
