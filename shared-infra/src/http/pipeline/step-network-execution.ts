@@ -87,7 +87,7 @@ export class StepNetworkExecution implements PipelineStep {
         return;
       } catch (err: any) {
         lastError = err;
-        if (ctx.circuitKey) {
+        if (ctx.circuitKey && attempt === maxAttempts) {
           ctx.circuitBreaker.onFailure(ctx.circuitKey);
         }
 

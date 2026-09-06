@@ -162,6 +162,10 @@ export class ScalableHttpClient {
   public async delete<T>(url: string, headers?: Record<string, string>, options: Partial<RequestConfig> = {}): Promise<{ data: T; status: number; headers: any }> {
     return this.execute<T>({ ...options, method: HTTP_CONSTANTS.METHOD_DELETE, url, headers });
   }
+
+  public resetCircuitBreaker(circuitKey?: string): void {
+    this.circuitBreaker.reset(circuitKey);
+  }
 }
 
 export const httpClient = new ScalableHttpClient();

@@ -30,13 +30,21 @@ export class StandardCircuitBreaker {
 
   constructor(
     private readonly failureThreshold = 5,
-    private readonly cooldownMs = 3600000,
+    private readonly cooldownMs = 10000,
     private readonly maxEntries = 1000
   ) {}
 
   public getCircuitKey(tenantId: string, routeTemplateOrUrl: string): string {
     const route = deriveRouteTemplate(routeTemplateOrUrl);
     return `${tenantId}:${route}`;
+  }
+
+  public reset(circuitKey?: string): void {
+    if (circuitKey) {
+      this.states.delete(circuitKey);
+    } else {
+      this.states.clear();
+    }
   }
 
 
