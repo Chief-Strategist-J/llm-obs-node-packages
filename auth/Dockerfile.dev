@@ -4,9 +4,7 @@ WORKDIR /app
 
 RUN apk add --no-cache bash
 
-COPY api-types /app/packages/node/api-types
 COPY design-tokens /app/packages/node/design-tokens
-COPY realtime-sdk /app/packages/node/realtime-sdk
 COPY shared-infra /app/packages/node/shared-infra
 COPY auth /app/packages/node/auth
 
