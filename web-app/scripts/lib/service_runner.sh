@@ -74,6 +74,11 @@ cmd_dev() {
     target_services=("web-app" "storybook")
   fi
 
+  if [ -d "$SCRIPT_DIR/../../design-tokens" ]; then
+    log_info "Compiling design tokens..."
+    node "$SCRIPT_DIR/../../design-tokens/build.js" || true
+  fi
+
   if command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1 && [ -f "docker-compose.yaml" ]; then
     log_info "Cleaning up previous web-app image..."
     docker image rm web-app-web-app web-app --force >/dev/null 2>&1 || true
@@ -96,7 +101,6 @@ cmd_dev() {
     fi
   done
 
-  clean_deep_artifacts
   cmd_install_deps
 
   log_header "FIXED SERVICE ENDPOINTS [ENV=${APP_ENV}]:"
