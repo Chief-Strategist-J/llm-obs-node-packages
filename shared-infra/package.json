@@ -3,25 +3,86 @@
   "version": "1.0.0",
   "description": "Core engine: httpClient, adapters, decorators, event bus, rules engine, feature flags, centralized OpenTelemetry & messaging tracing",
   "type": "module",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "exports": {
-    ".": "./src/index.ts",
-    "./http": "./src/http/http-client.ts",
-    "./store": "./src/store/index.ts",
-    "./data-driven": "./src/data-driven/index.ts",
-    "./event-bus": "./src/event-bus/index.ts",
-    "./rules-engine": "./src/rules-engine/index.ts",
-    "./feature-flags": "./src/feature-flags/resolve-flag.ts",
-    "./messaging": "./src/messaging/index.ts",
-    "./kafka": "./src/messaging/index.ts",
-    "./tracing": "./src/tracing/index.ts",
-    "./discovery": "./src/discovery/index.ts",
-    "./json-map": "./src/data-driven/json-map.ts",
-    "./utils": "./src/utils/index.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./http": {
+      "types": "./dist/http/http-client.d.ts",
+      "import": "./dist/http/http-client.js",
+      "require": "./dist/http/http-client.cjs"
+    },
+    "./store": {
+      "types": "./dist/store/index.d.ts",
+      "import": "./dist/store/index.js",
+      "require": "./dist/store/index.cjs"
+    },
+    "./data-driven": {
+      "types": "./dist/data-driven/index.d.ts",
+      "import": "./dist/data-driven/index.js",
+      "require": "./dist/data-driven/index.cjs"
+    },
+    "./event-bus": {
+      "types": "./dist/event-bus/index.d.ts",
+      "import": "./dist/event-bus/index.js",
+      "require": "./dist/event-bus/index.cjs"
+    },
+    "./rules-engine": {
+      "types": "./dist/rules-engine/index.d.ts",
+      "import": "./dist/rules-engine/index.js",
+      "require": "./dist/rules-engine/index.cjs"
+    },
+    "./feature-flags": {
+      "types": "./dist/feature-flags/resolve-flag.d.ts",
+      "import": "./dist/feature-flags/resolve-flag.js",
+      "require": "./dist/feature-flags/resolve-flag.cjs"
+    },
+    "./messaging": {
+      "types": "./dist/messaging/index.d.ts",
+      "import": "./dist/messaging/index.js",
+      "require": "./dist/messaging/index.cjs"
+    },
+    "./kafka": {
+      "types": "./dist/messaging/index.d.ts",
+      "import": "./dist/messaging/index.js",
+      "require": "./dist/messaging/index.cjs"
+    },
+    "./tracing": {
+      "types": "./dist/tracing/index.d.ts",
+      "import": "./dist/tracing/index.js",
+      "require": "./dist/tracing/index.cjs"
+    },
+    "./discovery": {
+      "types": "./dist/discovery/index.d.ts",
+      "import": "./dist/discovery/index.js",
+      "require": "./dist/discovery/index.cjs"
+    },
+    "./json-map": {
+      "types": "./dist/json-map/index.d.ts",
+      "import": "./dist/json-map/index.js",
+      "require": "./dist/json-map/index.cjs"
+    },
+    "./utils": {
+      "types": "./dist/utils/index.d.ts",
+      "import": "./dist/utils/index.js",
+      "require": "./dist/utils/index.cjs"
+    }
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run typecheck && npm run build"
   },
   "dependencies": {
     "@opentelemetry/api": "^1.9.0",
@@ -42,6 +103,7 @@
     "@types/node": "^20.11.0",
     "react": "^19.0.0",
     "react-redux": "^9.2.0",
+    "tsup": "^8.5.1",
     "typescript": "^5.4.0",
     "vitest": "^2.1.8"
   }

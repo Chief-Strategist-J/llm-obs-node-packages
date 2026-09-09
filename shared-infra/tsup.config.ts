@@ -1,0 +1,37 @@
+import { defineConfig } from "tsup";
+
+export default defineConfig({
+  entry: {
+    index: "src/index.ts",
+    "http/http-client": "src/http/http-client.ts",
+    "data-driven/index": "src/data-driven/index.ts",
+    "event-bus/index": "src/event-bus/index.ts",
+    "rules-engine/index": "src/rules-engine/index.ts",
+    "feature-flags/resolve-flag": "src/feature-flags/resolve-flag.ts",
+    "messaging/index": "src/messaging/index.ts",
+    "tracing/index": "src/tracing/index.ts",
+    "discovery/index": "src/discovery/index.ts",
+    "utils/index": "src/utils/index.ts",
+    "store/index": "src/store/index.ts",
+    "json-map/index": "src/data-driven/json-map.ts",
+  },
+  format: ["esm", "cjs"],
+  dts: true,
+  sourcemap: true,
+  clean: true,
+  external: [
+    "react",
+    "react-redux",
+    "@reduxjs/toolkit",
+    "redux-saga",
+    "@opentelemetry/api",
+    "@opentelemetry/context-async-hooks",
+    "@opentelemetry/exporter-trace-otlp-http",
+    "@opentelemetry/resources",
+    "@opentelemetry/sdk-trace-node",
+    "@opentelemetry/semantic-conventions",
+    "zod",
+  ],
+  treeshake: true,
+  splitting: false,
+});
