@@ -1,4 +1,4 @@
-import type { KafkaEvent } from '../../infra/messaging/client-factory';
+import type { KafkaEvent } from '../client/client-factory';
 
 export interface IEventHandler<T = unknown> {
   eventName: string;

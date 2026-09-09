@@ -1,16 +1,30 @@
+/**
+ * @file messaging-tracer.ts
+ * @description W3C Traceparent Context Propagation & OpenTelemetry Messaging Spans.
+ * 
+ * ALGORITHM & SPECIFICATION:
+ * 1. Trace ID & Span ID Generation:
+ *    - Generates 128-bit hex trace IDs and 64-bit hex span IDs for distributed context propagation.
+ * 2. W3C Traceparent Header Encoding/Decoding:
+ *    - Parses `00-{traceId}-{parentSpanId}-01` and generates fresh child span traceparents.
+ * 3. OpenTelemetry Messaging Semantics:
+ *    - Spans are initiated with PRODUCER / CONSUMER kinds and decorated with destination and correlation IDs.
+ */
+
 import { SpanKind, SpanStatusCode, type Span } from '@opentelemetry/api';
 import { getTracer } from '../../tracing/tracer';
-import type { KafkaHeaders, KafkaEvent } from '../../infra/messaging/client-factory';
+import type { KafkaHeaders, KafkaEvent } from '../client/client-factory';
+import { MESSAGING_CONSTANTS } from '../constants/constants';
 
 export interface MessagingTraceSpan {
-  otelSpan: Span;
-  traceId: string;
-  spanId: string;
-  parentSpanId?: string;
-  operation: 'publish' | 'process';
-  topic: string;
-  eventName: string;
-  startTime: number;
+  readonly otelSpan: Span;
+  readonly traceId: string;
+  readonly spanId: string;
+  readonly parentSpanId?: string;
+  readonly operation: 'publish' | 'process';
+  readonly topic: string;
+  readonly eventName: string;
+  readonly startTime: number;
 }
 
 export class MessagingTracer {
@@ -51,7 +65,7 @@ export class MessagingTracer {
     topic: string,
     eventName: string,
     existingHeaders?: KafkaHeaders,
-    serviceName = 'observability-service',
+    serviceName: string = MESSAGING_CONSTANTS.DEFAULT_SERVICE_NAME,
   ): { span: MessagingTraceSpan; headers: KafkaHeaders } {
     const tracer = getTracer(serviceName);
     const parsed = this.parseTraceparent(existingHeaders?.traceparent);
@@ -65,7 +79,7 @@ export class MessagingTracer {
         'messaging.operation': 'publish',
         'messaging.correlation_id': existingHeaders?.correlationId || '',
         'messaging.request_id': existingHeaders?.requestId || '',
-        'messaging.tenant_id': existingHeaders?.tenantId || 'tenant-default',
+        'messaging.tenant_id': existingHeaders?.tenantId || MESSAGING_CONSTANTS.TENANT_DEFAULT,
       },
     });
 
@@ -77,11 +91,11 @@ export class MessagingTracer {
     const headers: KafkaHeaders = {
       ...existingHeaders,
       traceparent: newTraceparent,
-      tracestate: existingHeaders?.tracestate || 'rojo=1',
+      tracestate: existingHeaders?.tracestate || MESSAGING_CONSTANTS.ROJO_STATE,
       correlationId: existingHeaders?.correlationId,
       requestId: existingHeaders?.requestId,
       idempotencyKey: existingHeaders?.idempotencyKey,
-      tenantId: existingHeaders?.tenantId || 'tenant-default',
+      tenantId: existingHeaders?.tenantId || MESSAGING_CONSTANTS.TENANT_DEFAULT,
     };
 
     const span: MessagingTraceSpan = {
@@ -89,7 +103,7 @@ export class MessagingTracer {
       traceId,
       spanId,
       parentSpanId: parsed.parentSpanId,
-      operation: 'publish',
+      operation: MESSAGING_CONSTANTS.OPERATION_PUBLISH,
       topic,
       eventName,
       startTime: Date.now(),
@@ -101,7 +115,7 @@ export class MessagingTracer {
   public static createConsumerSpan(
     event: KafkaEvent<unknown>,
     topic: string,
-    serviceName = 'observability-service',
+    serviceName: string = MESSAGING_CONSTANTS.DEFAULT_SERVICE_NAME,
   ): MessagingTraceSpan {
     const tracer = getTracer(serviceName);
     const parsed = this.parseTraceparent(event.headers?.traceparent);
@@ -109,10 +123,10 @@ export class MessagingTracer {
     const otelSpan = tracer.startSpan(`Kafka CONSUMER ${event.eventName}`, {
       kind: SpanKind.CONSUMER,
       attributes: {
-        'messaging.system': 'kafka',
+        'messaging.system': MESSAGING_CONSTANTS.MESSAGING_SYSTEM_KAFKA,
         'messaging.destination': topic,
         'messaging.kafka.event_name': event.eventName,
-        'messaging.operation': 'process',
+        'messaging.operation': MESSAGING_CONSTANTS.OPERATION_PROCESS,
         'messaging.message_id': event.id,
         'messaging.correlation_id': event.headers?.correlationId || '',
         'messaging.request_id': event.headers?.requestId || '',
@@ -127,7 +141,7 @@ export class MessagingTracer {
       traceId: spanContext.traceId,
       spanId: spanContext.spanId,
       parentSpanId: parsed.parentSpanId,
-      operation: 'process',
+      operation: MESSAGING_CONSTANTS.OPERATION_PROCESS,
       topic,
       eventName: event.eventName,
       startTime: Date.now(),

@@ -79,7 +79,7 @@ describe('ScalableHttpClient Fleet Resilience Architecture', () => {
     it('blocks private internal IP ranges and invalid protocols', async () => {
       await expect(validateDestinationUrl('http://169.254.169.254/latest/meta-data')).rejects.toThrow(/SSRF Blocked/);
       await expect(validateDestinationUrl('http://127.0.0.1/admin')).rejects.toThrow(/SSRF Blocked/);
-      await expect(validateDestinationUrl('ftp://api.org/data')).rejects.toThrow(/Blocked insecure URL protocol scheme/);
+      await expect(validateDestinationUrl('ftp://api.org/data')).rejects.toThrow(/Blocked insecure destination URL protocol scheme/);
     });
 
     it('allows valid public HTTP/HTTPS URLs', async () => {

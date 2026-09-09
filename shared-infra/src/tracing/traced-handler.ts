@@ -1,5 +1,5 @@
 import { type Span, SpanKind, SpanStatusCode, withSpan } from './tracer';
-import type { KafkaEvent } from '../kafka/kafka-client';
+import type { KafkaEvent } from '../messaging/client/client-factory';
 import { z } from 'zod';
 import { TRACING_CONSTANTS } from './constants';
 

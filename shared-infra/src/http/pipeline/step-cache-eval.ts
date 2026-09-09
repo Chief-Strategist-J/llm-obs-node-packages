@@ -4,7 +4,7 @@
  */
 
 import type { PipelineStep, PipelineContext } from "./types";
-import { isCacheDisabled } from "../utils/http-utils";
+import { isCacheDisabled } from "../../utils/http-utils";
 import { HTTP_CONSTANTS } from "../constants";
 
 export class StepCacheEval implements PipelineStep {

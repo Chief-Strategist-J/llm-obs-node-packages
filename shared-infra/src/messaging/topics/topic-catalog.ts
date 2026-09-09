@@ -1,49 +1,49 @@
+/**
+ * @file topic-catalog.ts
+ * @description Pure Functional, Strongly-Typed, and Immutable Topic Catalog Registry.
+ * 
+ * ALGORITHM & SPECIFICATION:
+ * 1. Topic Registration:
+ *    - Stores deeply frozen `TopicMetadata` definitions in an internal lookup map.
+ * 2. Topic Querying:
+ *    - Supports direct key lookup or reverse name lookup.
+ * 3. Topic Listing:
+ *    - Returns frozen arrays of topic metadata (`Object.freeze`), preserving data immutability.
+ */
+
 export interface TopicMetadata {
-  name: string;
-  category: 'auth' | 'observability' | 'telemetry' | 'system';
-  schemaVersion: string;
-  partitions: number;
-  description: string;
+  readonly name: string;
+  readonly category: string;
+  readonly schemaVersion: string;
+  readonly partitions: number;
+  readonly description: string;
 }
 
-export const TOPIC_CATALOG: Record<string, TopicMetadata> = {
-  USER_CREATED: {
-    name: 'users.created.v1',
-    category: 'auth',
-    schemaVersion: 'v1',
-    partitions: 3,
-    description: 'Emitted when a new user completes registration',
-  },
-  USER_SIGNED_IN: {
-    name: 'users.signed_in.v1',
-    category: 'auth',
-    schemaVersion: 'v1',
-    partitions: 3,
-    description: 'Emitted when a user signs in successfully',
-  },
-  TELEMETRY_LOGS_INGESTED: {
-    name: 'telemetry.logs.ingested.v1',
-    category: 'telemetry',
-    schemaVersion: 'v1',
-    partitions: 6,
-    description: 'Emitted when raw telemetry log batch is ingested',
-  },
-  TELEMETRY_SPANS_INGESTED: {
-    name: 'telemetry.spans.ingested.v1',
-    category: 'telemetry',
-    schemaVersion: 'v1',
-    partitions: 6,
-    description: 'Emitted when trace spans are ingested',
-  },
-  ALERT_TRIGGERED: {
-    name: 'system.alerts.triggered.v1',
-    category: 'system',
-    schemaVersion: 'v1',
-    partitions: 3,
-    description: 'Emitted when system threshold alert triggers',
-  },
-};
+export class TopicCatalogRegistry {
+  private readonly topics: Map<string, Readonly<TopicMetadata>> = new Map();
 
-export function getTopicMetadata(topicName: string): TopicMetadata | undefined {
-  return Object.values(TOPIC_CATALOG).find((t) => t.name === topicName);
+  public registerTopic(key: string, metadata: Readonly<TopicMetadata>): void {
+    this.topics.set(key, Object.freeze({ ...metadata }));
+  }
+
+  public getTopic(keyOrName: string): Readonly<TopicMetadata> | undefined {
+    if (this.topics.has(keyOrName)) {
+      return this.topics.get(keyOrName);
+    }
+    return Array.from(this.topics.values()).find((t) => t.name === keyOrName);
+  }
+
+  public getAllTopics(): readonly TopicMetadata[] {
+    return Object.freeze(Array.from(this.topics.values()));
+  }
+
+  public hasTopic(keyOrName: string): boolean {
+    return this.getTopic(keyOrName) !== undefined;
+  }
+}
+
+export const topicCatalogRegistry = new TopicCatalogRegistry();
+
+export function getTopicMetadata(topicName: string): Readonly<TopicMetadata> | undefined {
+  return topicCatalogRegistry.getTopic(topicName);
 }

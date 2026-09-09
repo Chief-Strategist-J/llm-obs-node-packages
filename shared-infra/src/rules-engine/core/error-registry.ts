@@ -1,25 +1,38 @@
-import { RULES_ENGINE_CONSTANTS } from './constants';
+/**
+ * @file error-registry.ts
+ * @description Centralized Platform Error Descriptor Registry.
+ *
+ * ERROR REGISTRATION & RESOLUTION ALGORITHM:
+ * 1. Default Registration: Populate internal error map with standardized platform error descriptors upon initialization.
+ * 2. Custom Registration: Support registration of application-specific error descriptors keyed by error code string.
+ * 3. Safe Fallback Resolution:
+ *    a. Attempt lookup by error code.
+ *    b. Return matching `ErrorDescriptor` if found.
+ *    c. Return generic `ERR_UNKNOWN` descriptor fallback if error code is un-registered.
+ */
+
+import { RULES_ENGINE_CONSTANTS } from "../constants/rules.constants";
 
 export interface ErrorDescriptor {
-  code: string;
-  message: string;
-  category: typeof RULES_ENGINE_CONSTANTS.CAT_VALIDATION | typeof RULES_ENGINE_CONSTANTS.CAT_NETWORK | typeof RULES_ENGINE_CONSTANTS.CAT_CIRCUIT_BREAKER | typeof RULES_ENGINE_CONSTANTS.CAT_RULE_BREACH | typeof RULES_ENGINE_CONSTANTS.CAT_INTERNAL;
-  severity: typeof RULES_ENGINE_CONSTANTS.SEV_INFO | typeof RULES_ENGINE_CONSTANTS.SEV_WARNING | typeof RULES_ENGINE_CONSTANTS.SEV_ERROR | typeof RULES_ENGINE_CONSTANTS.SEV_CRITICAL;
-  httpStatus: number;
+  readonly code: string;
+  readonly message: string;
+  readonly category: typeof RULES_ENGINE_CONSTANTS.CAT_VALIDATION | typeof RULES_ENGINE_CONSTANTS.CAT_NETWORK | typeof RULES_ENGINE_CONSTANTS.CAT_CIRCUIT_BREAKER | typeof RULES_ENGINE_CONSTANTS.CAT_RULE_BREACH | typeof RULES_ENGINE_CONSTANTS.CAT_INTERNAL;
+  readonly severity: typeof RULES_ENGINE_CONSTANTS.SEV_INFO | typeof RULES_ENGINE_CONSTANTS.SEV_WARNING | typeof RULES_ENGINE_CONSTANTS.SEV_ERROR | typeof RULES_ENGINE_CONSTANTS.SEV_CRITICAL;
+  readonly httpStatus: number;
 }
 
-class CentralizedErrorRegistry {
+export class CentralizedErrorRegistry {
   private readonly errorsMap = new Map<string, ErrorDescriptor>();
 
   constructor() {
     this.registerDefaults();
   }
 
-  public register(desc: ErrorDescriptor): void {
+  public register(desc: Readonly<ErrorDescriptor>): void {
     this.errorsMap.set(desc.code, desc);
   }
 
-  public get(code: string): ErrorDescriptor {
+  public get(code: string): Readonly<ErrorDescriptor> {
     return (
       this.errorsMap.get(code) || {
         code: RULES_ENGINE_CONSTANTS.ERR_UNKNOWN,
@@ -31,8 +44,8 @@ class CentralizedErrorRegistry {
     );
   }
 
-  public getAll(): ErrorDescriptor[] {
-    return Array.from(this.errorsMap.values());
+  public getAll(): readonly ErrorDescriptor[] {
+    return Object.freeze(Array.from(this.errorsMap.values()));
   }
 
   private registerDefaults(): void {

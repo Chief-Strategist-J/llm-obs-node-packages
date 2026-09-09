@@ -1,6 +1,6 @@
 /**
  * @file step-auth-guard.ts
- * @description Middleware Step: Session Authentication & Redirect Guard.
+ * @description Generic Middleware Step: Session Authentication & Redirect Guard.
  * 
  * ALGORITHM & SPECIFICATION:
  * 1. Authentication Verification:
@@ -13,7 +13,7 @@ import { HTTP_CONSTANTS } from "../constants";
 import type { HttpMiddleware, HttpMiddlewareCtx } from "./types";
 
 export const withAuthGuard = (
-  signInRoute = HTTP_CONSTANTS.ENDPOINT_AUTH_SIGN_IN
+  signInRoute: string
 ): HttpMiddleware<HttpMiddlewareCtx, unknown> => {
   return (next) => async (ctx) => {
     try {

@@ -1,14 +1,19 @@
-import { RULES_ENGINE_CONSTANTS } from "../rules-engine/constants";
-import { errorRegistry } from "../rules-engine/error-registry";
+import { AsyncLocalStorage } from "async_hooks";
+import { z } from "zod";
+import { RULES_ENGINE_CONSTANTS, errorRegistry } from "../rules-engine";
+import { HTTP_CONSTANTS } from "../http/constants";
 
-export interface RequestContext {
-  requestId: string;
-  correlationId: string;
-  idempotencyKey: string;
-  tenantId: string;
-  traceparent: string;
-  tracestate?: string;
-}
+export const RequestContextSchema = z.object({
+  requestId: z.string().min(1),
+  correlationId: z.string().min(1),
+  idempotencyKey: z.string().min(1),
+  tenantId: z.string().min(1),
+  traceparent: z.string().min(1),
+  tracestate: z.string().optional(),
+  cascadeDepth: z.number().int().optional(),
+}).passthrough();
+
+export type RequestContext = z.infer<typeof RequestContextSchema>;
 
 interface StorageAdapter<T> {
   run<R>(store: T, callback: () => R): R;
@@ -35,13 +40,12 @@ class InMemoryStorageAdapter<T> implements StorageAdapter<T> {
 
 function initAsyncLocalStorage<T>(): StorageAdapter<T> {
   try {
-    const g = globalThis as any;
-    if (typeof g.AsyncLocalStorage === "function") {
-      return new g.AsyncLocalStorage();
+    if (typeof AsyncLocalStorage === HTTP_CONSTANTS.TYPE_FUNCTION) {
+      return new AsyncLocalStorage<T>();
     }
   } catch (err: any) {
     const errDesc = errorRegistry.get(RULES_ENGINE_CONSTANTS.ERR_CONTEXT_STORAGE_INIT_FAILED);
-    if (typeof console !== "undefined" && console.warn) {
+    if (typeof console !== HTTP_CONSTANTS.TYPE_UNDEFINED && console.warn) {
       console.warn(`${errDesc.message}: ${err?.message || String(err)}`);
     }
   }
@@ -49,7 +53,7 @@ function initAsyncLocalStorage<T>(): StorageAdapter<T> {
 }
 
 function getRandomHex(bytes: number): string {
-  if (typeof globalThis !== "undefined" && globalThis.crypto && typeof globalThis.crypto.getRandomValues === "function") {
+  if (typeof globalThis !== HTTP_CONSTANTS.TYPE_UNDEFINED && globalThis.crypto && typeof globalThis.crypto.getRandomValues === HTTP_CONSTANTS.TYPE_FUNCTION) {
     const arr = new Uint8Array(bytes);
     globalThis.crypto.getRandomValues(arr);
     return Array.from(arr, (b) => b.toString(16).padStart(2, "0")).join("");
@@ -71,23 +75,27 @@ export class RequestContextHolder {
   }
 
   public static create(incoming?: Partial<RequestContext>): RequestContext {
-    const requestId = incoming?.requestId || this.generateId('req');
-    const correlationId = incoming?.correlationId || this.generateId('corr');
-    const idempotencyKey = incoming?.idempotencyKey || incoming?.requestId || this.generateId('idem');
+    const requestId = incoming?.requestId || this.generateId(HTTP_CONSTANTS.PREFIX_REQ);
+    const correlationId = incoming?.correlationId || this.generateId(HTTP_CONSTANTS.PREFIX_CORR);
+    const idempotencyKey = incoming?.idempotencyKey || incoming?.requestId || this.generateId(HTTP_CONSTANTS.PREFIX_IDEM);
     const traceparent = incoming?.traceparent || this.generateW3CTraceparent();
 
-    return {
+    const rawContext = {
+      ...incoming,
       requestId,
       correlationId,
       idempotencyKey,
-      tenantId: incoming?.tenantId || 'tenant-default',
+      tenantId: incoming?.tenantId || HTTP_CONSTANTS.DEFAULT_TENANT_ID,
       traceparent,
-      tracestate: incoming?.tracestate || 'rojo=1',
+      tracestate: incoming?.tracestate || HTTP_CONSTANTS.DEFAULT_TRACESTATE,
     };
+
+    return RequestContextSchema.parse(rawContext);
   }
 
-  public static run<T>(context: RequestContext, callback: () => T): T {
-    return this.storage.run(context, callback);
+  public static run<T>(context: Partial<RequestContext>, callback: () => T): T {
+    const fullContext = this.create(context);
+    return this.storage.run(fullContext, callback);
   }
 
   public static get(): RequestContext {
@@ -96,24 +104,36 @@ export class RequestContextHolder {
       if (!store) {
         return this.createDefault();
       }
-      return store;
+      const merged = {
+        ...store,
+        requestId: store.requestId || this.generateId(HTTP_CONSTANTS.PREFIX_REQ),
+        correlationId: store.correlationId || this.generateId(HTTP_CONSTANTS.PREFIX_CORR),
+        idempotencyKey: store.idempotencyKey || store.requestId || this.generateId(HTTP_CONSTANTS.PREFIX_IDEM),
+        tenantId: store.tenantId || HTTP_CONSTANTS.DEFAULT_TENANT_ID,
+        traceparent: store.traceparent || this.generateW3CTraceparent(),
+        tracestate: store.tracestate || HTTP_CONSTANTS.DEFAULT_TRACESTATE,
+      };
+      return RequestContextSchema.parse(merged);
     } catch (err: any) {
       const errDesc = errorRegistry.get(RULES_ENGINE_CONSTANTS.ERR_UNKNOWN);
-      if (typeof console !== "undefined" && console.error) {
+      if (typeof console !== HTTP_CONSTANTS.TYPE_UNDEFINED && console.error) {
         console.error(`${errDesc.message}: ${err?.message || String(err)}`);
       }
       return this.createDefault();
     }
   }
 
+
   private static createDefault(): RequestContext {
-    return {
-      requestId: this.generateId('req'),
-      correlationId: this.generateId('corr'),
-      idempotencyKey: this.generateId('idem'),
-      tenantId: 'tenant-default',
+    const rawContext = {
+      requestId: this.generateId(HTTP_CONSTANTS.PREFIX_REQ),
+      correlationId: this.generateId(HTTP_CONSTANTS.PREFIX_CORR),
+      idempotencyKey: this.generateId(HTTP_CONSTANTS.PREFIX_IDEM),
+      tenantId: HTTP_CONSTANTS.DEFAULT_TENANT_ID,
       traceparent: this.generateW3CTraceparent(),
-      tracestate: 'rojo=1',
+      tracestate: HTTP_CONSTANTS.DEFAULT_TRACESTATE,
     };
+    return RequestContextSchema.parse(rawContext);
   }
 }
+

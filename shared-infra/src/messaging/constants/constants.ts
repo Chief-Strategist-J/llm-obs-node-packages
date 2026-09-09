@@ -1,0 +1,73 @@
+export const MESSAGING_CONSTANTS = {
+  // Environment Variable Keys
+  ENV_KAFKA_BROKERS: "KAFKA_BROKERS",
+  ENV_KAFKA_URL: "KAFKA_URL",
+  ENV_KAFKA_GROUP_ID: "KAFKA_GROUP_ID",
+  ENV_KAFKA_CONNECTION_TIMEOUT_MS: "KAFKA_CONNECTION_TIMEOUT_MS",
+  ENV_KAFKA_REQUEST_TIMEOUT_MS: "KAFKA_REQUEST_TIMEOUT_MS",
+  ENV_KAFKA_MAX_IN_FLIGHT_REQUESTS: "KAFKA_MAX_IN_FLIGHT_REQUESTS",
+  ENV_KAFKA_MAX_RETRIES: "KAFKA_MAX_RETRIES",
+  ENV_KAFKA_INITIAL_RETRY_TIME_MS: "KAFKA_INITIAL_RETRY_TIME_MS",
+  ENV_OTEL_SERVICE_NAME: "OTEL_SERVICE_NAME",
+  ENV_SERVICE_NAME: "SERVICE_NAME",
+
+  // Default Values
+  DEFAULT_KAFKA_BROKER: "localhost:9092",
+  DEFAULT_KAFKA_PORT: 9092,
+  DEFAULT_GROUP_ID_SUFFIX: "-group",
+  
+  DEFAULT_CONNECTION_TIMEOUT_MS: 5000,
+  DEFAULT_REQUEST_TIMEOUT_MS: 30000,
+  DEFAULT_MAX_IN_FLIGHT_REQUESTS: 5,
+  DEFAULT_MAX_RETRIES: 5,
+  DEFAULT_INITIAL_RETRY_TIME_MS: 100,
+
+  DEFAULT_SERVICE_NAME: "observability-service",
+  
+  // Headers & Context Keys
+  HEADER_TRACEPARENT: "traceparent",
+  HEADER_TRACESTATE: "tracestate",
+  HEADER_CORRELATION_ID: "correlationId",
+  HEADER_REQUEST_ID: "requestId",
+  HEADER_IDEMPOTENCY_KEY: "idempotencyKey",
+  HEADER_TENANT_ID: "tenantId",
+
+  // Suffixes, Delimiters & Telemetry Values
+  SUFFIX_DLQ: "-dlq",
+  SUFFIX_EVENT_DLQ: ".DLQ",
+  SEPARATOR_COMMA: ",",
+  TENANT_DEFAULT: "tenant-default",
+  ROJO_STATE: "rojo=1",
+
+  // Health Statuses
+  STATUS_HEALTHY: "healthy" as const,
+  STATUS_DEGRADED: "degraded" as const,
+  STATUS_UNHEALTHY: "unhealthy" as const,
+
+  // Operations & Telemetry Attributes
+  MESSAGING_SYSTEM_KAFKA: "kafka",
+  OPERATION_PUBLISH: "publish",
+  OPERATION_PROCESS: "process",
+
+  // Property Keys & ID Prefixes
+  KEY_BROKERS: "brokers",
+  CHAR_ZERO: "0",
+  PREFIX_TRACEPARENT_START: "00-",
+  SUFFIX_TRACEPARENT_END: "-01",
+  PREFIX_CORRELATION: "corr-",
+  PREFIX_EVENT: "evt-",
+  CHAR_HYPHEN: "-",
+  LOG_PREFIX_CLIENT_FACTORY: "[KafkaClientFactory:",
+
+  // Error Registry Codes
+  ERR_CONNECT_FAILED: "ERR_KAFKA_CONNECT_FAILED",
+  ERR_PUBLISH_FAILED: "ERR_KAFKA_PUBLISH_FAILED",
+  ERR_INVALID_BROKER_CONFIG: "ERR_KAFKA_INVALID_BROKER_CONFIG",
+
+  // Migration Statuses
+  MIGRATION_CREATED: "created" as const,
+  MIGRATION_UPDATED: "updated" as const,
+  MIGRATION_ALREADY_EXISTS: "already_exists" as const,
+  MIGRATION_ROLLED_BACK: "rolled_back" as const,
+  MIGRATION_FAILED: "failed" as const,
+} as const;

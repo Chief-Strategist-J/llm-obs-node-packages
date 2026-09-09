@@ -5,7 +5,7 @@
 
 
 import type { PipelineStep, PipelineContext } from "./types";
-import { calculateFullJitterBackoff } from "../utils/http-utils";
+import { calculateFullJitterBackoff } from "../../utils/http-utils";
 import { HTTP_CONSTANTS } from "../constants";
 
 export class StepNetworkExecution implements PipelineStep {

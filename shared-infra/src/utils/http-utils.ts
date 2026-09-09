@@ -16,28 +16,28 @@
  */
 
 import type { Attributes } from "@opentelemetry/api";
-import { HTTP_CONSTANTS } from "../constants";
+import { HTTP_CONSTANTS } from "../http/constants";
 
 const ALLOWED_TELEMETRY_SET = new Set<string>(HTTP_CONSTANTS.ALLOWED_TELEMETRY_ATTRIBUTES);
 
 export function sanitizeUrlForTelemetry(rawUrl: string): string {
   try {
     const parsed = new URL(rawUrl);
-    parsed.username = "";
-    parsed.password = "";
-    parsed.search = "";
+    parsed.username = HTTP_CONSTANTS.EMPTY_STRING;
+    parsed.password = HTTP_CONSTANTS.EMPTY_STRING;
+    parsed.search = HTTP_CONSTANTS.EMPTY_STRING;
     return parsed.toString();
   } catch {
     return rawUrl.split("?")[0] || rawUrl;
   }
 }
 
-export function filterAllowedAttributes(attributes: Record<string, unknown>): Attributes {
+export function filterAllowedAttributes(attributes: Readonly<Record<string, unknown>>): Attributes {
   const filtered: Attributes = {};
   for (const [key, value] of Object.entries(attributes)) {
     if (ALLOWED_TELEMETRY_SET.has(key)) {
-      if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
-        filtered[key] = value;
+      if (typeof value === HTTP_CONSTANTS.TYPE_STRING || typeof value === HTTP_CONSTANTS.TYPE_NUMBER || typeof value === HTTP_CONSTANTS.TYPE_BOOLEAN) {
+        filtered[key] = value as string | number | boolean;
       } else if (Array.isArray(value)) {
         filtered[key] = value.map((item) => String(item));
       } else if (value !== null && value !== undefined) {
@@ -64,7 +64,7 @@ function generateFastHash(str: string): string {
 }
 
 export function generateHashedKey(tenantId: string, method: string, url: string, body?: unknown): string {
-  const bodyStr = body ? JSON.stringify(body) : "";
+  const bodyStr = body ? JSON.stringify(body) : HTTP_CONSTANTS.EMPTY_STRING;
   const rawKey = `${tenantId}:${method.toUpperCase()}:${url}:${bodyStr}`;
   return generateFastHash(rawKey);
 }
@@ -72,14 +72,14 @@ export function generateHashedKey(tenantId: string, method: string, url: string,
 export function deriveRouteTemplate(urlStr: string): string {
   try {
     const parsed = new URL(urlStr);
-    const pathParts = parsed.pathname.split("/").map((part) => {
+    const pathParts = parsed.pathname.split(HTTP_CONSTANTS.CHAR_SLASH).map((part) => {
       if (!part) return part;
       if (/^[0-9]+$/.test(part) || /^[0-9a-fA-F-]{36}$/.test(part)) {
-        return ":id";
+        return HTTP_CONSTANTS.PARAM_ID_TEMPLATE;
       }
       return part;
     });
-    return `${parsed.hostname}${pathParts.join("/")}`;
+    return `${parsed.hostname}${pathParts.join(HTTP_CONSTANTS.CHAR_SLASH)}`;
   } catch {
     return urlStr;
   }
@@ -90,8 +90,8 @@ export function calculateFullJitterBackoff(attempt: number, baseMs = 200, maxMs 
   return Math.floor(Math.random() * cap);
 }
 
-export function isCacheDisabled(noCacheOption?: boolean, headers: Record<string, string> = {}): boolean {
-  const cacheControlHeader = (headers[HTTP_CONSTANTS.HEADER_CACHE_CONTROL] || "").toLowerCase();
+export function isCacheDisabled(noCacheOption?: boolean, headers: Readonly<Record<string, string>> = {}): boolean {
+  const cacheControlHeader = (headers[HTTP_CONSTANTS.HEADER_CACHE_CONTROL] || HTTP_CONSTANTS.EMPTY_STRING).toLowerCase();
   const hasNoCacheDirective =
     cacheControlHeader.includes(HTTP_CONSTANTS.CACHE_NO_CACHE) ||
     cacheControlHeader.includes(HTTP_CONSTANTS.CACHE_NO_STORE);

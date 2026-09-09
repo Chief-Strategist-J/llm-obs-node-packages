@@ -1,5 +1,5 @@
 import { call, put, takeEvery } from 'redux-saga/effects';
-import { eventBus } from '../event-bus/event-bus';
+import { eventBus } from '../event-bus';
 import type { CrudPort } from './create-entity-adapter';
 
 export function createEntitySagas<T extends { id: string }>(

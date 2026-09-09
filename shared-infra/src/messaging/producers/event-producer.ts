@@ -1,4 +1,5 @@
-import { CentralizedKafkaClient, KafkaEvent, KafkaHeaders } from '../../infra/messaging/client-factory';
+import { CentralizedKafkaClient, KafkaEvent, KafkaHeaders } from '../client/client-factory';
+import { MESSAGING_CONSTANTS } from '../constants/constants';
 import {
   ProducerMiddlewarePipeline,
   tracingProducerMiddleware,
@@ -9,12 +10,16 @@ import {
 export class TypedEventProducer {
   private pipeline: ProducerMiddlewarePipeline;
 
-  constructor(private kafkaClient: CentralizedKafkaClient) {
+  constructor(
+    private kafkaClient: CentralizedKafkaClient,
+    maxRetries = MESSAGING_CONSTANTS.DEFAULT_MAX_RETRIES,
+    initialDelayMs = MESSAGING_CONSTANTS.DEFAULT_INITIAL_RETRY_TIME_MS,
+  ) {
     this.pipeline = new ProducerMiddlewarePipeline();
     this.pipeline
       .use(tracingProducerMiddleware)
       .use(loggingProducerMiddleware)
-      .use(retryProducerMiddleware());
+      .use(retryProducerMiddleware(maxRetries, initialDelayMs));
   }
 
   public publish<T = unknown>(

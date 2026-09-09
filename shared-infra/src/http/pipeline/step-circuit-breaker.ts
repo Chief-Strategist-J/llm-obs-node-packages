@@ -4,7 +4,7 @@
  */
 
 import type { PipelineStep, PipelineContext } from "./types";
-import { deriveRouteTemplate } from "../utils/http-utils";
+import { deriveRouteTemplate } from "../../utils/http-utils";
 import { HTTP_CONSTANTS } from "../constants";
 
 export class StepCircuitBreaker implements PipelineStep {

@@ -28,7 +28,7 @@ import { FleetRetryBudget } from "../resilience/fleet-retry-budget";
 import { TenantRateLimiter } from "../resilience/tenant-rate-limiter";
 import { StandardCircuitBreaker } from "../resilience/standard-circuit-breaker";
 import { TenantPartitionedCacheStore } from "../resilience/tenant-partitioned-cache-store";
-import { sanitizeUrlForTelemetry } from "../utils/http-utils";
+import { sanitizeUrlForTelemetry } from "../../utils/http-utils";
 import type { RequestConfig, PipelineContext, PipelineStep } from "../pipeline/types";
 import { StepAdmissionControl } from "../pipeline/step-admission-control";
 import { StepContextIsolation } from "../pipeline/step-context-isolation";
@@ -95,12 +95,12 @@ export class ScalableHttpClient {
         try {
           // Execute decoupled steps sequentially
           for (const step of this.steps) {
-            span.setAttribute("execution.current_step", step.name);
+            span.setAttribute(HTTP_CONSTANTS.ATTR_CURRENT_STEP, step.name);
             try {
               await step.execute(ctx);
-              console.log(`Step - ${ctx.stepIndex} - [${step.name}] - ${step.description} - [DONE]`);
+              console.log(`${HTTP_CONSTANTS.LOG_PREFIX_STEP}${ctx.stepIndex} - [${step.name}] - ${step.description}${HTTP_CONSTANTS.LOG_SUFFIX_DONE}`);
             } catch (stepErr: any) {
-              console.error(`Step - ${ctx.stepIndex} - [${step.name}] - ${step.description} - [FAILED]`);
+              console.error(`${HTTP_CONSTANTS.LOG_PREFIX_STEP}${ctx.stepIndex} - [${step.name}] - ${step.description}${HTTP_CONSTANTS.LOG_SUFFIX_FAILED}`);
               throw stepErr;
             }
 
@@ -111,16 +111,16 @@ export class ScalableHttpClient {
               }
             }
 
-            if (ctx.cachedResponse !== undefined && step.name !== "NetworkExecution") {
+            if (ctx.cachedResponse !== undefined && step.name !== HTTP_CONSTANTS.STEP_NETWORK_EXECUTION) {
               // Early exit on cache hit
               span.setStatus({ code: SpanStatusCode.OK });
-              return { data: ctx.cachedResponse, status: 200, headers: {} };
+              return Object.freeze({ data: ctx.cachedResponse, status: 200, headers: Object.freeze({}) });
             }
           }
 
-          span.setAttribute("execution.step_count", ctx.stepIndex);
+          span.setAttribute(HTTP_CONSTANTS.ATTR_STEP_COUNT, ctx.stepIndex);
 
-          const result = { data: ctx.cachedResponse as T, status: ctx.statusCode ?? 200, headers: {} };
+          const result = Object.freeze({ data: ctx.cachedResponse as T, status: ctx.statusCode ?? 200, headers: Object.freeze({}) });
 
           if (rawConfig.method.toUpperCase() === HTTP_CONSTANTS.METHOD_GET && ctx.hashedRequestKey) {
             this.inFlightSingleflights.set(ctx.hashedRequestKey, Promise.resolve(result));

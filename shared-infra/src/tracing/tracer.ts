@@ -6,7 +6,12 @@ export { SpanKind, SpanStatusCode, trace, context, ATTR_SERVICE_NAME, ATTR_SERVI
 
 let providerInitialized = false;
 
-export function initNodeTracing(serviceName = 'observability-service', serviceVersion = '1.0.0'): void {
+declare const process: { env: Record<string, string | undefined> };
+
+export function initNodeTracing(
+  serviceName = process.env.OTEL_SERVICE_NAME || process.env.SERVICE_NAME || 'observability-service',
+  serviceVersion = process.env.OTEL_SERVICE_VERSION || '1.0.0',
+): void {
   if (providerInitialized || typeof window !== 'undefined') return;
 
   try {
@@ -14,7 +19,7 @@ export function initNodeTracing(serviceName = 'observability-service', serviceVe
     const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
     const { AsyncLocalStorageContextManager } = require('@opentelemetry/context-async-hooks');
 
-    process.env.OTEL_EXPORTER_OTLP_PROTOCOL = 'http/json';
+    process.env.OTEL_EXPORTER_OTLP_PROTOCOL = process.env.OTEL_EXPORTER_OTLP_PROTOCOL || 'http/json';
 
     const contextManager = new AsyncLocalStorageContextManager();
     contextManager.enable();
@@ -25,7 +30,11 @@ export function initNodeTracing(serviceName = 'observability-service', serviceVe
       [ATTR_SERVICE_VERSION]: serviceVersion,
     });
 
-    const otlpEndpoint = process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:31417/v1/traces';
+    const otlpEndpoint =
+      process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT ||
+      process.env.OTEL_EXPORTER_OTLP_ENDPOINT ||
+      process.env.OTEL_COLLECTOR_URL ||
+      'http://localhost:31417/v1/traces';
 
     const exporter = new OTLPTraceExporter({
       url: otlpEndpoint,
@@ -45,7 +54,10 @@ export function initNodeTracing(serviceName = 'observability-service', serviceVe
   }
 }
 
-export function getTracer(serviceName = 'observability-service', serviceVersion = '1.0.0'): Tracer {
+export function getTracer(
+  serviceName = process.env.OTEL_SERVICE_NAME || process.env.SERVICE_NAME || 'observability-service',
+  serviceVersion = process.env.OTEL_SERVICE_VERSION || '1.0.0',
+): Tracer {
   if (!providerInitialized && typeof window === 'undefined') {
     initNodeTracing(serviceName, serviceVersion);
   }

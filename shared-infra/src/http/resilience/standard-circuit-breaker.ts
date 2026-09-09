@@ -16,7 +16,7 @@
  */
 
 import { HTTP_CONSTANTS } from "../constants";
-import { deriveRouteTemplate } from "../utils/http-utils";
+import { deriveRouteTemplate } from "../../utils/http-utils";
 
 export interface CircuitState {
   state: "CLOSED" | "OPEN" | "HALF_OPEN";
@@ -32,7 +32,7 @@ export class StandardCircuitBreaker {
     private readonly failureThreshold = 5,
     private readonly cooldownMs = 10000,
     private readonly maxEntries = 1000
-  ) {}
+  ) { }
 
   public getCircuitKey(tenantId: string, routeTemplateOrUrl: string): string {
     const route = deriveRouteTemplate(routeTemplateOrUrl);

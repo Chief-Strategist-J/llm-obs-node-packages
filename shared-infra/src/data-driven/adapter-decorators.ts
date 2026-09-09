@@ -1,16 +1,30 @@
+/**
+ * @file adapter-decorators.ts
+ * @description Resilient Port Decorator Composition: Retry, Caching, Circuit Breaker, and OTEL Tracing.
+ */
+
 import type { CrudPort } from './create-entity-adapter';
 import { calculateFullJitterBackoff } from '../http/http-client';
 
+export const ADAPTER_DECORATOR_CONSTANTS = {
+  STATE_CLOSED: 'CLOSED',
+  STATE_OPEN: 'OPEN',
+  STATE_HALF_OPEN: 'HALF_OPEN',
+  MSG_CIRCUIT_OPEN: 'Circuit breaker is OPEN',
+  CACHE_KEY_LIST: 'list',
+  CACHE_KEY_GET_PREFIX: 'get:',
+} as const;
+
 export interface DecoratorOptions {
-  retries?: number;
-  backoffMs?: number;
-  maxBackoffMs?: number;
-  ttlMs?: number;
-  failureThreshold?: number;
-  resetTimeoutMs?: number;
+  readonly retries?: number;
+  readonly backoffMs?: number;
+  readonly maxBackoffMs?: number;
+  readonly ttlMs?: number;
+  readonly failureThreshold?: number;
+  readonly resetTimeoutMs?: number;
 }
 
-export function withRetry<T>(port: CrudPort<T>, options: DecoratorOptions = {}): CrudPort<T> {
+export function withRetry<T>(port: CrudPort<T>, options: Readonly<DecoratorOptions> = {}): CrudPort<T> {
   const maxRetries = options.retries ?? 3;
   const baseBackoff = options.backoffMs ?? 200;
   const maxBackoff = options.maxBackoffMs ?? 10000;
@@ -31,16 +45,16 @@ export function withRetry<T>(port: CrudPort<T>, options: DecoratorOptions = {}):
     throw lastError;
   }
 
-  return {
+  return Object.freeze({
     list: () => retryOperation(() => port.list()),
-    get: (id) => retryOperation(() => port.get(id)),
-    create: (payload) => retryOperation(() => port.create(payload)),
-    update: (id, payload) => retryOperation(() => port.update(id, payload)),
-    remove: (id) => retryOperation(() => port.remove(id)),
-  };
+    get: (id: string) => retryOperation(() => port.get(id)),
+    create: (payload: Partial<T>) => retryOperation(() => port.create(payload)),
+    update: (id: string, payload: Partial<T>) => retryOperation(() => port.update(id, payload)),
+    remove: (id: string) => retryOperation(() => port.remove(id)),
+  });
 }
 
-export function withCache<T>(port: CrudPort<T>, options: DecoratorOptions = {}): CrudPort<T> {
+export function withCache<T>(port: CrudPort<T>, options: Readonly<DecoratorOptions> = {}): CrudPort<T> {
   const ttl = options.ttlMs ?? 60000;
   const cache = new Map<string, { data: unknown; timestamp: number }>();
 
@@ -56,88 +70,84 @@ export function withCache<T>(port: CrudPort<T>, options: DecoratorOptions = {}):
     });
   }
 
-  function invalidateCache() {
+  function invalidateCache(): void {
     cache.clear();
   }
 
-  return {
-    list: () => getCached('list', () => port.list()),
-    get: (id) => getCached(`get:${id}`, () => port.get(id)),
-    create: async (payload) => {
+  return Object.freeze({
+    list: () => getCached(ADAPTER_DECORATOR_CONSTANTS.CACHE_KEY_LIST, () => port.list()),
+    get: (id: string) => getCached(`${ADAPTER_DECORATOR_CONSTANTS.CACHE_KEY_GET_PREFIX}${id}`, () => port.get(id)),
+    create: async (payload: Partial<T>) => {
       const res = await port.create(payload);
       invalidateCache();
       return res;
     },
-    update: async (id, payload) => {
+    update: async (id: string, payload: Partial<T>) => {
       const res = await port.update(id, payload);
       invalidateCache();
       return res;
     },
-    remove: async (id) => {
+    remove: async (id: string) => {
       await port.remove(id);
       invalidateCache();
     },
-  };
+  });
 }
 
-export function withCircuitBreaker<T>(port: CrudPort<T>, options: DecoratorOptions = {}): CrudPort<T> {
+export function withCircuitBreaker<T>(port: CrudPort<T>, options: Readonly<DecoratorOptions> = {}): CrudPort<T> {
   const threshold = options.failureThreshold ?? 5;
   const resetTimeout = options.resetTimeoutMs ?? 30000;
 
   let failures = 0;
-  let state: 'CLOSED' | 'OPEN' | 'HALF_OPEN' = 'CLOSED';
+  let state: typeof ADAPTER_DECORATOR_CONSTANTS.STATE_CLOSED | typeof ADAPTER_DECORATOR_CONSTANTS.STATE_OPEN | typeof ADAPTER_DECORATOR_CONSTANTS.STATE_HALF_OPEN = ADAPTER_DECORATOR_CONSTANTS.STATE_CLOSED;
   let nextAttempt = 0;
 
   async function execute<R>(fn: () => Promise<R>): Promise<R> {
     const now = Date.now();
-    if (state === 'OPEN') {
+    if (state === ADAPTER_DECORATOR_CONSTANTS.STATE_OPEN) {
       if (now > nextAttempt) {
-        state = 'HALF_OPEN';
+        state = ADAPTER_DECORATOR_CONSTANTS.STATE_HALF_OPEN;
       } else {
-        throw new Error('Circuit breaker is OPEN');
+        throw new Error(ADAPTER_DECORATOR_CONSTANTS.MSG_CIRCUIT_OPEN);
       }
     }
 
     try {
       const result = await fn();
-      if (state === 'HALF_OPEN') {
-        state = 'CLOSED';
+      if (state === ADAPTER_DECORATOR_CONSTANTS.STATE_HALF_OPEN) {
+        state = ADAPTER_DECORATOR_CONSTANTS.STATE_CLOSED;
         failures = 0;
       }
       return result;
     } catch (err) {
       failures++;
       if (failures >= threshold) {
-        state = 'OPEN';
+        state = ADAPTER_DECORATOR_CONSTANTS.STATE_OPEN;
         nextAttempt = Date.now() + resetTimeout;
       }
       throw err;
     }
   }
 
-  return {
+  return Object.freeze({
     list: () => execute(() => port.list()),
-    get: (id) => execute(() => port.get(id)),
-    create: (payload) => execute(() => port.create(payload)),
-    update: (id, payload) => execute(() => port.update(id, payload)),
-    remove: (id) => execute(() => port.remove(id)),
-  };
+    get: (id: string) => execute(() => port.get(id)),
+    create: (payload: Partial<T>) => execute(() => port.create(payload)),
+    update: (id: string, payload: Partial<T>) => execute(() => port.update(id, payload)),
+    remove: (id: string) => execute(() => port.remove(id)),
+  });
 }
 
 export function withTracing<T>(port: CrudPort<T>, name: string): CrudPort<T> {
   async function trace<R>(_op: string, fn: () => Promise<R>): Promise<R> {
-    try {
-      return await fn();
-    } catch (err) {
-      throw err;
-    }
+    return await fn();
   }
 
-  return {
+  return Object.freeze({
     list: () => trace(`${name}.list`, () => port.list()),
-    get: (id) => trace(`${name}.get`, () => port.get(id)),
-    create: (payload) => trace(`${name}.create`, () => port.create(payload)),
-    update: (id, payload) => trace(`${name}.update`, () => port.update(id, payload)),
-    remove: (id) => trace(`${name}.remove`, () => port.remove(id)),
-  };
+    get: (id: string) => trace(`${name}.get`, () => port.get(id)),
+    create: (payload: Partial<T>) => trace(`${name}.create`, () => port.create(payload)),
+    update: (id: string, payload: Partial<T>) => trace(`${name}.update`, () => port.update(id, payload)),
+    remove: (id: string) => trace(`${name}.remove`, () => port.remove(id)),
+  });
 }

@@ -10,13 +10,15 @@
     "./http": "./src/http/http-client.ts",
     "./store": "./src/store/index.ts",
     "./data-driven": "./src/data-driven/index.ts",
-    "./event-bus": "./src/event-bus/event-bus.ts",
+    "./event-bus": "./src/event-bus/index.ts",
     "./rules-engine": "./src/rules-engine/index.ts",
     "./feature-flags": "./src/feature-flags/resolve-flag.ts",
-    "./kafka": "./src/kafka/kafka-client.ts",
+    "./messaging": "./src/messaging/index.ts",
+    "./kafka": "./src/messaging/index.ts",
     "./tracing": "./src/tracing/index.ts",
     "./discovery": "./src/discovery/index.ts",
-    "./json-map": "./src/data-driven/json-map.ts"
+    "./json-map": "./src/data-driven/json-map.ts",
+    "./utils": "./src/utils/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"

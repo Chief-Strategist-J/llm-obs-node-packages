@@ -1,4 +1,4 @@
-import type { KafkaEvent, KafkaHeaders } from '../../infra/messaging/client-factory';
+import type { KafkaEvent, KafkaHeaders } from '../client/client-factory';
 import { MessagingTracer } from '../tracing/messaging-tracer';
 
 export type ProducerNextFn<T = unknown> = (
@@ -17,10 +17,10 @@ export type ProducerMiddleware = <T = unknown>(
 ) => Promise<KafkaEvent<T>>;
 
 export class ProducerMiddlewarePipeline {
-  private middlewares: ProducerMiddleware[] = [];
+  private middlewares: readonly ProducerMiddleware[] = Object.freeze([]);
 
   public use(middleware: ProducerMiddleware): this {
-    this.middlewares.push(middleware);
+    this.middlewares = Object.freeze([...this.middlewares, middleware]);
     return this;
   }
 
@@ -90,8 +90,8 @@ export const loggingProducerMiddleware: ProducerMiddleware = async (
 };
 
 export const retryProducerMiddleware = (
-  maxRetries = 3,
-  initialDelayMs = 100,
+  maxRetries: number,
+  initialDelayMs: number,
 ): ProducerMiddleware => {
   return async (topic, eventName, payload, headers, next) => {
     let attempt = 0;

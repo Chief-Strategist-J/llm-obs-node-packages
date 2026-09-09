@@ -4,7 +4,7 @@
  */
 
 import type { PipelineStep, PipelineContext } from "./types";
-import { generateHashedKey } from "../utils/http-utils";
+import { generateHashedKey } from "../../utils/http-utils";
 import { HTTP_CONSTANTS } from "../constants";
 
 export class StepSingleflight implements PipelineStep {

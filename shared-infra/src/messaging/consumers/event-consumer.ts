@@ -1,4 +1,4 @@
-import { CentralizedKafkaClient, KafkaEvent, KafkaEventHandler } from '../../infra/messaging/client-factory';
+import { CentralizedKafkaClient, KafkaEvent, KafkaEventHandler } from '../client/client-factory';
 import {
   ConsumerMiddlewarePipeline,
   idempotencyConsumerMiddleware,

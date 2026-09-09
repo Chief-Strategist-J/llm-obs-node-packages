@@ -27,14 +27,15 @@ interface ServiceEndpointCacheEntry {
 
 export class ServiceResolver {
   private catalog: Record<string, ServiceDefinition> = SERVICE_CATALOG;
-  private registryUrl: string;
   private cache = new Map<string, ResolutionCacheEntry>();
   private endpointCache = new Map<string, ServiceEndpointCacheEntry>();
   private readonly ttlMs = HTTP_CONSTANTS.DEFAULT_RESOLVER_TTL_MS || 30000;
 
-  constructor() {
-    this.registryUrl = process.env[HTTP_CONSTANTS.ENV_SERVICE_REGISTRY_URL] || HTTP_CONSTANTS.DEFAULT_SERVICE_REGISTRY_URL;
+  private get registryUrl(): string {
+    return process.env[HTTP_CONSTANTS.ENV_SERVICE_REGISTRY_URL] || process.env.SERVICE_REGISTRY_URL || HTTP_CONSTANTS.DEFAULT_SERVICE_REGISTRY_URL;
   }
+
+  constructor() {}
 
   public clearCache(): void {
     this.cache.clear();

@@ -1,4 +1,4 @@
-import type { KafkaEvent, CentralizedKafkaClient } from '../../infra/messaging/client-factory';
+import type { KafkaEvent, CentralizedKafkaClient } from '../client/client-factory';
 import { MessagingTracer } from '../tracing/messaging-tracer';
 
 export type ConsumerNextFn<T = unknown> = (
@@ -13,10 +13,10 @@ export type ConsumerMiddleware = <T = unknown>(
 ) => Promise<void>;
 
 export class ConsumerMiddlewarePipeline {
-  private middlewares: ConsumerMiddleware[] = [];
+  private middlewares: readonly ConsumerMiddleware[] = Object.freeze([]);
 
   public use(middleware: ConsumerMiddleware): this {
-    this.middlewares.push(middleware);
+    this.middlewares = Object.freeze([...this.middlewares, middleware]);
     return this;
   }
 
@@ -122,9 +122,9 @@ export const dlqConsumerMiddleware = (client: CentralizedKafkaClient): ConsumerM
 };
 
 export const retryConsumerMiddleware = (
-  maxRetries = 3,
-  initialDelayMs = 50,
-  jitterFactor = 0.5,
+  maxRetries: number,
+  initialDelayMs: number,
+  jitterFactor: number,
 ): ConsumerMiddleware => {
   return async (event, topic, next) => {
     let attempt = 0;
