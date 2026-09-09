@@ -1,4 +1,4 @@
-name: Publish @observability/shared-infra
+name: Publish @chief-strategist-j/shared-infra
 
 on:
   push:

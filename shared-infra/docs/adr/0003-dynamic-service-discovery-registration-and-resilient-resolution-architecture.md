@@ -3,7 +3,7 @@
 * **Status**: Accepted
 * **Deciders**: Architecture Team, Core Infrastructure Working Group
 * **Date**: 2026-09-04
-* **Scope**: `@observability/shared-infra` (`packages/node/shared-infra/src/discovery`)
+* **Scope**: `@chief-strategist-j/shared-infra` (`packages/node/shared-infra/src/discovery`)
 
 ---
 
@@ -17,7 +17,7 @@ Prior to this architectural enhancement, service-to-service communication suffer
 3. **High Resolution Latency**: Un-cached remote name resolution introduced unnecessary network overhead on every outbound microservice RPC call.
 4. **Lack of Resilient Fallbacks**: If a central service registry or DNS service experienced downtime, all downstream inter-service calls immediately threw unhandled network exceptions, crashing client features.
 
-We require a standardized, zero-dependency, highly resilient Service Discovery and Registration architecture within `@observability/shared-infra` that provides automatic service registration, periodic heartbeats, automated process shutdown unregistration, TTL-bounded in-memory caching, and a deterministic 3-tier fallback resolution cascade.
+We require a standardized, zero-dependency, highly resilient Service Discovery and Registration architecture within `@chief-strategist-j/shared-infra` that provides automatic service registration, periodic heartbeats, automated process shutdown unregistration, TTL-bounded in-memory caching, and a deterministic 3-tier fallback resolution cascade.
 
 ---
 
@@ -89,7 +89,7 @@ We require a standardized, zero-dependency, highly resilient Service Discovery a
 
 ## 3. Detailed Component Architecture & Specifications
 
-The discovery system is partitioned into four core modules under `@observability/shared-infra/src/discovery`:
+The discovery system is partitioned into four core modules under `@chief-strategist-j/shared-infra/src/discovery`:
 
 ```text
 packages/node/shared-infra/src/discovery/
@@ -314,7 +314,7 @@ graph TD
     LATENCY["Latency Engine (Port 8003)"]
   end
 
-  subgraph SharedDiscovery ["Shared Infrastructure Discovery (@observability/shared-infra)"]
+  subgraph SharedDiscovery ["Shared Infrastructure Discovery (@chief-strategist-j/shared-infra)"]
     SRM["ServiceRegistryManager"]
     SRE["ServiceResolver"]
     CATALOG["SERVICE_CATALOG (Metadata Map)"]
@@ -468,7 +468,7 @@ The Next.js `web-app` package automatically registers its instance during Node.j
 
 ```typescript
 // packages/node/web-app/src/instrumentation.ts
-import { HTTP_CONSTANTS } from "@observability/shared-infra";
+import { HTTP_CONSTANTS } from "@chief-strategist-j/shared-infra";
 import { webAppRegistryManager } from "@/lib/service-registry/web-app-registration";
 
 export async function register() {

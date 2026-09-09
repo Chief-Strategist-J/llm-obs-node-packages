@@ -3,7 +3,7 @@
 * **Status**: Accepted
 * **Deciders**: Architecture Team, Core Infrastructure Working Group
 * **Date**: 2026-08-31
-* **Scope**: `@observability/shared-infra` (`packages/node/shared-infra`)
+* **Scope**: `@chief-strategist-j/shared-infra` (`packages/node/shared-infra`)
 
 ---
 
