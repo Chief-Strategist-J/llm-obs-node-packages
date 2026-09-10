@@ -1,6 +1,6 @@
 {
   "name": "@chief-strategist-j/shared-infra",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Core engine: httpClient, adapters, decorators, event bus, rules engine, feature flags, centralized OpenTelemetry & messaging tracing",
   "type": "module",
   "main": "./dist/index.js",
