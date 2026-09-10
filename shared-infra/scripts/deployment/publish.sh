@@ -71,6 +71,15 @@ execute_publish() {
   local token="$1"
   local pkg_name="$2"
   local pkg_version="$3"
+  
+  local existing_version
+  existing_version=$(NODE_AUTH_TOKEN="$token" npm view "$pkg_name" version 2>/dev/null || echo "")
+  if [ -n "$existing_version" ] && [ "$existing_version" = "$pkg_version" ]; then
+    echo "Version ${pkg_version} is already published on registry. Auto-bumping patch version..."
+    npm version patch --no-git-tag-version
+    pkg_version=$(get_package_version)
+  fi
+
   echo "Publishing ${pkg_name}@${pkg_version} to GitHub Packages..."
   NODE_AUTH_TOKEN="$token" npm publish --access public
   echo "Package ${pkg_name}@${pkg_version} published successfully!"
