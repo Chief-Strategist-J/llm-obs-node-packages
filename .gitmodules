@@ -6,3 +6,6 @@
 	path = auth
 	url = https://github.com/Chief-Strategist-J/auth.git
 	branch = main
+[submodule "shared-infra"]
+	path = shared-infra
+	url = https://github.com/Chief-Strategist-J/llm-node-share-ref.git
