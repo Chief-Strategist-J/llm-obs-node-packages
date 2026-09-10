@@ -77,11 +77,13 @@
     }
   },
   "publishConfig": {
+    "access": "public",
     "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
     "build": "tsup",
     "typecheck": "tsc --noEmit",
+    "publish:github": "./scripts/deployment/publish.sh",
     "prepublishOnly": "npm run typecheck && npm run build"
   },
   "dependencies": {
