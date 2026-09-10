@@ -352,12 +352,32 @@ export function deepGet<T = unknown>(obj: unknown, path: string | string[], fall
 
   const parts = Array.isArray(path)
     ? path
-    : path.replace(/^\//, HTTP_CONSTANTS.EMPTY_STRING).replace(/\//g, HTTP_CONSTANTS.CHAR_DOT).replace(/\[(\d+)\]/g, `${HTTP_CONSTANTS.CHAR_DOT}$1`).split(HTTP_CONSTANTS.CHAR_DOT).filter(Boolean);
+    : path
+        .replace(/^\//, HTTP_CONSTANTS.EMPTY_STRING)
+        .replace(/\//g, HTTP_CONSTANTS.CHAR_DOT)
+        .replace(/\[(\d+|\*)\]/g, `${HTTP_CONSTANTS.CHAR_DOT}$1`)
+        .split(HTTP_CONSTANTS.CHAR_DOT)
+        .filter(Boolean);
 
   let curr: any = obj;
-  for (const part of parts) {
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i];
     if (curr === null || curr === undefined || DANGEROUS_KEYS.has(part)) return fallback as T;
-    curr = curr[part];
+
+    if (part === HTTP_CONSTANTS.CHAR_ASTERISK || part === HTTP_CONSTANTS.WILDCARD_ALL) {
+      if (Array.isArray(curr)) {
+        const subPath = parts.slice(i + 1);
+        if (subPath.length === 0) return Object.freeze([...curr]) as unknown as T;
+        const results = curr.map((item) => deepGet(item, subPath)).flat(Infinity);
+        return Object.freeze(results) as unknown as T;
+      }
+    } else if (Array.isArray(curr) && !/^\d+$/.test(part)) {
+      const subPath = parts.slice(i);
+      const results = curr.map((item) => deepGet(item, subPath)).flat(Infinity);
+      return Object.freeze(results) as unknown as T;
+    } else {
+      curr = curr[part];
+    }
   }
   return (curr === undefined ? fallback : curr) as T;
 }

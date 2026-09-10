@@ -1,4 +1,31 @@
 import type { Path } from '../types/transform.types';
+import { deepGet } from '../../utils/json-utils';
+
+export interface DeepPathMapping {
+  readonly from: string;
+  readonly to: string;
+  readonly default?: unknown;
+  readonly transform?: (val: unknown) => unknown;
+}
+
+export function remapDeepPaths(
+  source: Readonly<Record<string, unknown>>,
+  mappings: readonly DeepPathMapping[]
+): Readonly<Record<string, unknown>> {
+  let result: Record<string, unknown> = {};
+
+  for (const map of mappings) {
+    const rawVal = deepGet(source, map.from);
+    const val = rawVal !== undefined ? rawVal : map.default;
+    if (val !== undefined) {
+      const finalVal = map.transform ? map.transform(val) : val;
+      const pathParts = map.to.split('.');
+      result = setIn(result, pathParts, finalVal) as Record<string, unknown>;
+    }
+  }
+
+  return Object.freeze(result);
+}
 
 export function getIn(target: Readonly<Record<string, unknown>>, path: Path): unknown {
   let current: unknown = target;
