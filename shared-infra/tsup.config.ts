@@ -13,7 +13,7 @@ export default defineConfig({
     "discovery/index": "src/discovery/index.ts",
     "utils/index": "src/utils/index.ts",
     "store/index": "src/store/index.ts",
-    "json-map/index": "src/data-driven/json-map.ts",
+    "json-map/index": "src/data-driven/transforms/json-map.ts",
   },
   format: ["esm", "cjs"],
   dts: true,

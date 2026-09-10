@@ -1,8 +1,3 @@
-/**
- * @file transform.types.ts
- * @description Strongly Typed Enums, Constants, and Readonly Operation Descriptors for Data Transformations.
- */
-
 export const DATA_TRANSFORM_CONSTANTS = {
   OP_RENAME: 'rename',
   OP_PICK: 'pick',
@@ -70,9 +65,9 @@ export enum SortDirection {
 }
 
 export type ListOp =
-  | { readonly op: ListOpKind.FILTER | 'filter'; readonly field: string; readonly value: unknown; readonly cmp?: FilterComparison | `${FilterComparison}` }
+  | { readonly op: ListOpKind.FILTER | 'filter'; readonly field: string; readonly value: unknown; readonly cmp: FilterComparison | `${FilterComparison}` }
   | { readonly op: ListOpKind.SEARCH | 'search'; readonly fields: readonly string[]; readonly query: string }
-  | { readonly op: ListOpKind.SORT | 'sort'; readonly field: string; readonly direction?: SortDirection | `${SortDirection}`; readonly dir?: SortDirection | `${SortDirection}` }
+  | { readonly op: ListOpKind.SORT | 'sort'; readonly field: string; readonly direction: SortDirection | `${SortDirection}`; readonly dir: SortDirection | `${SortDirection}` }
   | { readonly op: ListOpKind.PAGINATE | 'paginate'; readonly page: number; readonly pageSize: number }
   | { readonly op: ListOpKind.PICK | 'pick'; readonly fields: readonly string[] }
   | { readonly op: ListOpKind.GROUP_BY | 'groupBy'; readonly field: string };
@@ -87,3 +82,27 @@ export type JsonMapOp =
   | { readonly op: JsonMapOpKind.DEFAULT | 'default'; readonly field: string; readonly value: unknown }
   | { readonly op: JsonMapOpKind.COERCE | 'coerce'; readonly key: string; readonly to: CoerceTarget | `${CoerceTarget}` }
   | { readonly op: JsonMapOpKind.COERCE | 'coerce'; readonly field: string; readonly to: CoerceTarget | `${CoerceTarget}` };
+
+export type Path = readonly (string | number)[];
+
+export interface TreeNode<T = unknown> {
+  readonly id: string;
+  readonly value: T;
+  readonly children: readonly TreeNode<T>[];
+}
+
+export interface GraphNode<T = unknown> {
+  readonly id: string;
+  readonly data: T;
+}
+
+export interface GraphEdge {
+  readonly from: string;
+  readonly to: string;
+  readonly weight: number;
+}
+
+export interface Graph<T = unknown> {
+  readonly nodes: readonly GraphNode<T>[];
+  readonly edges: readonly GraphEdge[];
+}

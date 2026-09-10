@@ -14,8 +14,8 @@
 
 import { serviceResolver } from "../discovery/engine/service-resolver";
 
-import { mapJson } from "../data-driven/json-map";
-import type { JsonMapOp } from "../data-driven/transform.types";
+import { mapJson } from "../data-driven";
+import type { JsonMapOp } from "../data-driven";
 import { httpClient } from "./client/scalable-http-client";
 
 export * from "./constants";

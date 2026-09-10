@@ -1,22 +1,5 @@
-/**
- * @file list-transform.ts
- * @description Pure Functional, Non-Mutating Data-Driven List Transformation Engine.
- *
- * LIST TRANSFORMATION ALGORITHM:
- * 1. Initialize `result` as a shallow copy of the input `rows` collection to guarantee caller input immutability.
- * 2. Sequential Operator Processing (Pure Pipelines):
- *    a. FILTER: Produce a fresh filtered array matching target field value or comparison operator.
- *    b. SEARCH: Produce a fresh filtered array matching search query across target string fields.
- *    c. SORT: Clone array prior to sorting (`[...result].sort()`) to prevent in-place mutation of frozen inputs.
- *    d. PAGINATE: Produce a fresh slice of records corresponding to requested page index and size.
- *    e. PICK: Project each record into a newly constructed object containing only the requested fields.
- *    f. GROUP_BY: Retain immutable records grouped by target key without in-place modification.
- * 3. Output Immutability:
- *    Map and freeze each individual record, then return a frozen array (`Object.freeze`).
- */
-
-import type { ListOp } from './transform.types';
-import { ListOpKind, SortDirection, DATA_TRANSFORM_CONSTANTS } from './transform.types';
+import type { ListOp } from '../types/transform.types';
+import { ListOpKind, SortDirection, DATA_TRANSFORM_CONSTANTS } from '../types/transform.types';
 
 export function transformList<T extends Record<string, unknown>>(
   rows: readonly T[],
@@ -46,7 +29,6 @@ export function transformList<T extends Record<string, unknown>>(
       case DATA_TRANSFORM_CONSTANTS.OP_SORT: {
         const sortDir = 'dir' in op && op.dir ? op.dir : ('direction' in op && op.direction ? op.direction : SortDirection.ASC);
         const dir = sortDir === SortDirection.ASC ? 1 : -1;
-        // Clone array prior to sort to strictly avoid in-place mutation of frozen arrays
         result = [...result].sort((a, b) => {
           const aVal = a[op.field];
           const bVal = b[op.field];
@@ -85,4 +67,59 @@ export function transformList<T extends Record<string, unknown>>(
 
   const frozenItems = result.map((item) => Object.freeze({ ...item }));
   return Object.freeze(frozenItems) as readonly T[];
+}
+
+export function groupByList<T extends Record<string, unknown>>(
+  rows: readonly T[],
+  key: string
+): Readonly<Record<string, readonly T[]>> {
+  const grouped: Record<string, T[]> = {};
+  for (const row of rows) {
+    const k = String(row[key] ?? '');
+    if (!grouped[k]) {
+      grouped[k] = [];
+    }
+    grouped[k].push({ ...row });
+  }
+
+  const frozenGrouped: Record<string, readonly T[]> = {};
+  for (const [groupKey, items] of Object.entries(grouped)) {
+    frozenGrouped[groupKey] = Object.freeze(items.map((item) => Object.freeze({ ...item })));
+  }
+  return Object.freeze(frozenGrouped);
+}
+
+export function partitionList<T extends Record<string, unknown>>(
+  rows: readonly T[],
+  predicate: (item: T) => boolean
+): readonly [readonly T[], readonly T[]] {
+  const pass: T[] = [];
+  const fail: T[] = [];
+  for (const row of rows) {
+    if (predicate(row)) {
+      pass.push({ ...row });
+    } else {
+      fail.push({ ...row });
+    }
+  }
+  return Object.freeze([
+    Object.freeze(pass.map((item) => Object.freeze({ ...item }))),
+    Object.freeze(fail.map((item) => Object.freeze({ ...item }))),
+  ]);
+}
+
+export function distinctByList<T extends Record<string, unknown>>(
+  rows: readonly T[],
+  key: string
+): readonly T[] {
+  const seen = new Set<unknown>();
+  const result: T[] = [];
+  for (const row of rows) {
+    const val = row[key];
+    if (!seen.has(val)) {
+      seen.add(val);
+      result.push({ ...row });
+    }
+  }
+  return Object.freeze(result.map((item) => Object.freeze({ ...item })));
 }

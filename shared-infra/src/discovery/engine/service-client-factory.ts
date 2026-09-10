@@ -3,10 +3,10 @@ import {
   withCache,
   withCircuitBreaker,
   withTracing,
-} from "../../data-driven/adapter-decorators";
+} from "../../data-driven";
 import { executeQueryAdapter } from "../../http/http-client";
 import { SERVICE_CATALOG } from "../catalog/service-catalog";
-import type { JsonMapOp } from "../../data-driven/transform.types";
+import type { JsonMapOp } from "../../data-driven";
 
 export interface QuerySpec {
   endpoint: string;

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { transformList } from '../list-transform';
-import { mapJson } from '../json-map';
-import { ListOpKind, SortDirection, JsonMapOpKind, CoerceTarget } from '../transform.types';
+import { transformList, groupByList, partitionList, distinctByList } from '../transforms/list-transform';
+import { mapJson } from '../transforms/json-map';
+import { ListOpKind, SortDirection, JsonMapOpKind, CoerceTarget, FilterComparison } from '../types/transform.types';
 
 describe('Data-Driven Transforms - Immutability & Pure Functions', () => {
   describe('transformList - Non-Mutating Pure List Operations', () => {
@@ -15,20 +15,17 @@ describe('Data-Driven Transforms - Immutability & Pure Functions', () => {
       const originalOrder = [...input];
 
       const sorted = transformList(input, [
-        { op: ListOpKind.SORT, field: 'score', direction: SortDirection.ASC },
+        { op: ListOpKind.SORT, field: 'score', direction: SortDirection.ASC, dir: SortDirection.ASC },
       ]);
 
-      // Original input was NOT mutated
       expect(input[0].id).toBe(originalOrder[0].id);
       expect(input[1].id).toBe(originalOrder[1].id);
       expect(input[2].id).toBe(originalOrder[2].id);
 
-      // Result is correctly sorted
       expect(sorted[0].id).toBe('1');
       expect(sorted[1].id).toBe('2');
       expect(sorted[2].id).toBe('3');
 
-      // Result and items are deeply frozen
       expect(Object.isFrozen(sorted)).toBe(true);
       expect(Object.isFrozen(sorted[0])).toBe(true);
     });
@@ -41,7 +38,7 @@ describe('Data-Driven Transforms - Immutability & Pure Functions', () => {
       ]);
 
       const filtered = transformList(input, [
-        { op: ListOpKind.FILTER, field: 'active', value: true },
+        { op: ListOpKind.FILTER, field: 'active', value: true, cmp: FilterComparison.EQ },
         { op: ListOpKind.SEARCH, fields: ['name'], query: 'service' },
       ]);
 
@@ -81,6 +78,30 @@ describe('Data-Driven Transforms - Immutability & Pure Functions', () => {
       expect(paged[1].id).toBe('4');
       expect(Object.isFrozen(paged)).toBe(true);
     });
+
+    it('groups, partitions, and distincts lists purely and immutably', () => {
+      const input = Object.freeze([
+        { id: '1', role: 'admin', age: 30 },
+        { id: '2', role: 'user', age: 20 },
+        { id: '3', role: 'admin', age: 40 },
+        { id: '4', role: 'user', age: 20 },
+      ]);
+
+      const grouped = groupByList(input, 'role');
+      expect(Object.keys(grouped)).toEqual(['admin', 'user']);
+      expect(grouped.admin.length).toBe(2);
+      expect(Object.isFrozen(grouped)).toBe(true);
+
+      const [adults, seniors] = partitionList(input, (item) => (item.age as number) <= 30);
+      expect(adults.length).toBe(3);
+      expect(seniors.length).toBe(1);
+      expect(Object.isFrozen(adults)).toBe(true);
+
+      const distinct = distinctByList(input, 'role');
+      expect(distinct.length).toBe(2);
+      expect(distinct.map((d) => d.role)).toEqual(['admin', 'user']);
+      expect(Object.isFrozen(distinct)).toBe(true);
+    });
   });
 
   describe('mapJson - Pure Non-Mutating JSON Transformations', () => {
@@ -93,19 +114,17 @@ describe('Data-Driven Transforms - Immutability & Pure Functions', () => {
 
       const mapped = mapJson(source, [
         { op: JsonMapOpKind.RENAME, from: 'user_name', to: 'username' },
-        { op: JsonMapOpKind.COERCE, field: 'age_str', to: CoerceTarget.NUMBER },
-        { op: JsonMapOpKind.DEFAULT, field: 'role', value: 'developer' },
-        { op: JsonMapOpKind.OMIT, fields: ['internal_key'] },
+        { op: JsonMapOpKind.COERCE, field: 'age_str', key: 'age_str', to: CoerceTarget.NUMBER },
+        { op: JsonMapOpKind.DEFAULT, field: 'role', key: 'role', value: 'developer' },
+        { op: JsonMapOpKind.OMIT, fields: ['internal_key'], keys: ['internal_key'] },
       ]);
 
-      // Original source untouched
       expect(source).toEqual({
         user_name: 'alice',
         age_str: '28',
         internal_key: 'sensitive',
       });
 
-      // Mapped result matches contract
       expect(mapped).toEqual({
         username: 'alice',
         age_str: 28,

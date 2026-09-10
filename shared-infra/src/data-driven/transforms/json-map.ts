@@ -1,20 +1,5 @@
-/**
- * @file json-map.ts
- * @description Pure Functional, Non-Mutating JSON Mapping and Anti-Corruption Layer.
- *
- * JSON MAPPING ALGORITHM:
- * 1. Initialize `result` as an immutable shallow copy of input `obj`.
- * 2. Process Transformation Operations Sequentially:
- *    a. RENAME: Construct a fresh object mapping `from` key to `to` key without in-place delete mutations.
- *    b. PICK: Construct a fresh object containing only explicitly targeted keys.
- *    c. OMIT: Construct a fresh object excluding omitted keys via pure destructuring/filtering.
- *    d. DEFAULT: Inject default value if field is undefined/null in a fresh copy.
- *    e. COERCE: Type-cast target value to string, number, boolean, or date in a fresh copy.
- * 3. Return a deeply frozen (`Object.freeze`) immutable output object.
- */
-
-import type { JsonMapOp } from './transform.types';
-import { JsonMapOpKind, CoerceTarget, DATA_TRANSFORM_CONSTANTS } from './transform.types';
+import type { JsonMapOp } from '../types/transform.types';
+import { JsonMapOpKind, CoerceTarget, DATA_TRANSFORM_CONSTANTS } from '../types/transform.types';
 
 function coerceValue(value: unknown, to: CoerceTarget | `${CoerceTarget}`): unknown {
   switch (to) {
