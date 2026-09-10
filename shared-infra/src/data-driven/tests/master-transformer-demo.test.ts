@@ -180,8 +180,8 @@ describe('Master Data Transformer — Unified Pipeline Engine', () => {
     }
 
     expect(envelope.originalData[0].user_id).toBe('usr_master_1');
-    expect(envelope.originalData[0].profile.credentials.password_hash).toBe('master_pass_123');
-    expect(envelope.originalData[0].l1.l2[0].l3.l4[0].l5.l6[0].l7.l8[0].l9.l10[0].secretKey).toBe('level10_deep_secret_1');
+    expect((envelope.originalData[0] as any).profile.credentials.password_hash).toBe('master_pass_123');
+    expect((envelope.originalData[0] as any).l1.l2[0].l3.l4[0].l5.l6[0].l7.l8[0].l9.l10[0].secretKey).toBe('level10_deep_secret_1');
     expect((envelope.originalData[0] as any).recursiveTree.childNode.secretToken).toBe('recursive_secret_2');
   });
 
@@ -211,15 +211,15 @@ describe('Master Data Transformer — Unified Pipeline Engine', () => {
     const jsonSpec: DataPipelineSpec = Object.freeze({
       name: 'PureJSONDrivenSpec',
       steps: Object.freeze([
-        { type: 'where', field: 'department', operator: 'eq', value: 'Engineering' },
+        { type: 'where' as const, field: 'department', operator: 'eq' as const, value: 'Engineering' },
         {
-          type: 'loadOneToMany',
+          type: 'loadOneToMany' as const,
           storeName: 'projectsStore',
           spec: { localKey: 'id', foreignKey: 'member_id', as: 'assignedProjects' },
         },
-        { type: 'makeHidden', keys: ['secret_token'] },
-        { type: 'orderBy', field: 'name', direction: 'asc' },
-        { type: 'paginate', spec: { page: 1, pageSize: 5 } },
+        { type: 'makeHidden' as const, keys: ['secret_token'] },
+        { type: 'orderBy' as const, field: 'name', direction: 'asc' as const },
+        { type: 'paginate' as const, spec: { page: 1, pageSize: 5 } },
       ]),
     });
 
@@ -234,7 +234,7 @@ describe('Master Data Transformer — Unified Pipeline Engine', () => {
     expect(user.assignedProjects.length).toBe(2);
     expect(user.secret_token).toBeUndefined();
 
-    expect(envelope.originalData[0].secret_token).toBe('tok_abc123');
+    expect((envelope.originalData[0] as any).secret_token).toBe('tok_abc123');
   });
 
   it('demonstrates high-level createPipeline DX helper with explain plan and toSpecJson export', () => {

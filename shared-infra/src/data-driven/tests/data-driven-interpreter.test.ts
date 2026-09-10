@@ -27,16 +27,16 @@ describe('Data Driven Pipeline Interpreter', () => {
     const spec: DataPipelineSpec = Object.freeze({
       name: 'JSONDrivenUserPipeline',
       steps: Object.freeze([
-        { type: 'where', field: 'score', operator: '>=', value: 70 },
-        { type: 'whereJsonContains', path: 'tags', value: 'dev' },
+        { type: 'where' as const, field: 'score', operator: '>=' as const, value: 70 },
+        { type: 'whereJsonContains' as const, path: 'tags', value: 'dev' },
         {
-          type: 'loadOneToMany',
+          type: 'loadOneToMany' as const,
           storeName: 'posts',
           spec: { localKey: 'id', foreignKey: 'userId', as: 'userPosts' },
         },
-        { type: 'makeHidden', keys: ['profile.secretKey'] },
-        { type: 'orderBy', field: 'score', direction: 'desc' },
-        { type: 'paginate', spec: { page: 1, pageSize: 10 } },
+        { type: 'makeHidden' as const, keys: ['profile.secretKey'] },
+        { type: 'orderBy' as const, field: 'score', direction: 'desc' as const },
+        { type: 'paginate' as const, spec: { page: 1, pageSize: 10 } },
       ]),
     });
 
@@ -51,7 +51,6 @@ describe('Data Driven Pipeline Interpreter', () => {
     expect(user.userPosts.length).toBe(2);
     expect(user.profile.secretKey).toBeUndefined();
 
-    // Verify original data is untouched
     expect(rawUsers[0].profile.secretKey).toBe('key_123');
   });
 });
