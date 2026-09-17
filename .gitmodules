@@ -13,3 +13,12 @@
 	path = llm-obs-policies
 	url = https://github.com/Chief-Strategist-J/llm-obs-policies.git
 	branch = main
+[submodule "payment"]
+	path = payment
+	url = https://github.com/Chief-Strategist-J/payment.git
+	branch = main
+[submodule "notification"]
+	path = notification
+	url = https://github.com/Chief-Strategist-J/notification.git
+	branch = main
+
