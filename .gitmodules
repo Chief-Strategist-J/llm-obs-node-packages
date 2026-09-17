@@ -9,3 +9,7 @@
 [submodule "shared-infra"]
 	path = shared-infra
 	url = https://github.com/Chief-Strategist-J/llm-node-share-ref.git
+[submodule "llm-obs-policies"]
+	path = llm-obs-policies
+	url = https://github.com/Chief-Strategist-J/llm-obs-policies.git
+	branch = main
